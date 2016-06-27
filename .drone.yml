@@ -1,0 +1,7 @@
+clone:
+  depth: 1
+build:
+  image: golang
+  commands:
+    - go vet
+    - go test
