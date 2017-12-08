@@ -16,7 +16,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"html/template"
 )
 
@@ -32,14 +31,9 @@ type copyrightData struct {
 	Holder string
 }
 
-// prefix will execute a license template l with data d
+// prefix will execute a license template t with data d
 // and prefix the result with top, middle and bottom.
-func prefix(l string, d *copyrightData, top, mid, bot string) ([]byte, error) {
-	t := licenseTemplate[l]
-	if t == nil {
-		return nil, fmt.Errorf("unknown license: %s", l)
-	}
-
+func prefix(t *template.Template, d *copyrightData, top, mid, bot string) ([]byte, error) {
 	var buf bytes.Buffer
 	if err := t.Execute(&buf, d); err != nil {
 		return nil, err
