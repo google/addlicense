@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
+	"html/template"
 	"io/ioutil"
 	"log"
 	"os"
@@ -57,6 +58,18 @@ func main() {
 	if flag.NArg() == 0 {
 		flag.Usage()
 		os.Exit(1)
+	}
+
+	switch *license {
+	case "mit", "apache":
+	default:
+		fname := *license + ".tmpl"
+		nt, err := template.ParseFiles(fname)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "can't load external template", *license+".tmpl", err)
+			os.Exit(2)
+		}
+		licenseTemplate[*license] = nt
 	}
 
 	data := &copyrightData{

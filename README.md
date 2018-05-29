@@ -21,6 +21,15 @@ to any file that already has one.
 The pattern argument can be provided multiple times, and may also refer
 to single files.
 
+## custom license
+
+modify my.tmpl as your license template.
+
+	addlicense -l my partern...
+
+note: tmpl file name(witch out .tmpl extention) always same as template name
+
+
 ## license
 
 Apache 2.0
