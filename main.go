@@ -127,7 +127,7 @@ func addLicense(path string, fmode os.FileMode, typ string, data *copyrightData)
 		lic, err = prefix(typ, data, "", ";; ", "")
 	case ".erl":
 		lic, err = prefix(typ, data, "", "% ", "")
-	case ".hs":
+	case ".hs", ".sql":
 		lic, err = prefix(typ, data, "", "-- ", "")
 	case ".html", ".xml":
 		lic, err = prefix(typ, data, "<!--", " ", "-->")
