@@ -95,7 +95,17 @@ type file struct {
 	mode os.FileMode
 }
 
-func walk(ch chan<- *file, start string) {
+func walk(ch chan<- *file, path string) {
+	matches, _ := filepath.Glob(path)
+	if matches == nil {
+		matches = []string{path}
+	}
+	for _, start := range matches {
+		walkPath(ch, start)
+	}
+}
+
+func walkPath(ch chan<- *file, start string) {
 	filepath.Walk(start, func(path string, fi os.FileInfo, err error) error {
 		if err != nil {
 			log.Printf("%s error: %v", path, err)
