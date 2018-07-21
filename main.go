@@ -24,6 +24,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 )
@@ -155,6 +156,12 @@ func addLicense(path string, fmode os.FileMode, typ string, data *copyrightData)
 	return ioutil.WriteFile(path, b, fmode)
 }
 
+var head = []string{
+	"#!",        // shell script
+	"<?xml",     // XML declaratioon
+	"<!doctype", // HTML doctype
+}
+
 func hashBang(b []byte) []byte {
 	var line []byte
 	for _, c := range b {
@@ -163,8 +170,11 @@ func hashBang(b []byte) []byte {
 			break
 		}
 	}
-	if bytes.HasPrefix(line, []byte("#!")) {
-		return line
+	first := strings.ToLower(string(line))
+	for _, h := range head {
+		if strings.HasPrefix(first, h) {
+			return line
+		}
 	}
 	return nil
 }
