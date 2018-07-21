@@ -43,7 +43,7 @@ Flags:
 `
 
 var (
-	holder  = flag.String("c", "Google Inc.", "copyright holder")
+	holder  = flag.String("c", "Google LLC", "copyright holder")
 	license = flag.String("l", "apache", "license type: apache, bsd, mit")
 	year    = flag.Int("y", time.Now().Year(), "year")
 )
