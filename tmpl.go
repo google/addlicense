@@ -15,9 +15,12 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"html/template"
+	"strings"
+	"unicode"
 )
 
 var licenseTemplate = make(map[string]*template.Template)
@@ -47,21 +50,16 @@ func prefix(l string, d *copyrightData, top, mid, bot string) ([]byte, error) {
 	}
 	var out bytes.Buffer
 	if top != "" {
-		out.WriteString(top)
-		out.WriteRune('\n')
+		fmt.Fprintln(&out, top)
 	}
-	out.WriteString(mid)
-	for _, c := range buf.Bytes() {
-		out.WriteByte(c)
-		if c == '\n' {
-			out.WriteString(mid)
-		}
+	s := bufio.NewScanner(&buf)
+	for s.Scan() {
+		fmt.Fprintln(&out, strings.TrimRightFunc(mid+s.Text(), unicode.IsSpace))
 	}
 	if bot != "" {
-		out.WriteRune('\n')
-		out.WriteString(bot)
+		fmt.Fprintln(&out, bot)
 	}
-	out.Write([]byte{'\n', '\n'})
+	fmt.Fprintln(&out)
 	return out.Bytes(), nil
 }
 
