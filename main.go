@@ -117,7 +117,7 @@ func addLicense(path string, fmode os.FileMode, typ string, data *copyrightData)
 		return nil
 	case ".c", ".h":
 		lic, err = prefix(typ, data, "/*", " * ", " */")
-	case ".js", ".css":
+	case ".js", ".css", ".tf":
 		lic, err = prefix(typ, data, "/**", " * ", " */")
 	case ".cc", ".cpp", ".cs", ".go", ".hh", ".hpp", ".java", ".m", ".mm", ".proto", ".rs", ".scala", ".swift", ".dart":
 		lic, err = prefix(typ, data, "", "// ", "")
