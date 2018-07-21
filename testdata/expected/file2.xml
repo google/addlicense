@@ -1,4 +1,4 @@
-<!doctype html>
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <!--
  Copyright 2016 Google Inc.
 
@@ -15,4 +15,7 @@
  limitations under the License.
 -->
 
-<p>Hello World!</p>
+<root>
+	<one>one</one>
+	<two/>
+</root>
