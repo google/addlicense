@@ -71,7 +71,7 @@ func main() {
 	if *licensef != "" {
 		d, err := ioutil.ReadFile(*licensef)
 		if err != nil {
-			log.Printf("license file: %s", err)
+			log.Printf("license file: %v", err)
 			os.Exit(1)
 		}
 		t, err = template.New("").Parse(string(d))
