@@ -71,12 +71,12 @@ func main() {
 	if *licensef != "" {
 		d, err := ioutil.ReadFile(*licensef)
 		if err != nil {
-			log.Printf("template error: %s", err)
+			log.Printf("license file: %s", err)
 			os.Exit(1)
 		}
 		t, err = template.New("").Parse(string(d))
 		if err != nil {
-			log.Printf("template error: %s", err)
+			log.Printf("license file: %s", err)
 			os.Exit(1)
 		}
 	} else {
