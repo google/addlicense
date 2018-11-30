@@ -76,7 +76,7 @@ func main() {
 		}
 		t, err = template.New("").Parse(string(d))
 		if err != nil {
-			log.Printf("license file: %s", err)
+			log.Printf("license file: %v", err)
 			os.Exit(1)
 		}
 	} else {
