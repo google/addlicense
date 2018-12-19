@@ -1,4 +1,4 @@
-// Copyright 2016 Google Inc.
+// Copyright 2018 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ func TestInitial(t *testing.T) {
 	for i := 0; i < 2; i++ {
 		t.Logf("run #%d", i)
 		targs := []string{"-test.run=TestInitial"}
-		cargs := []string{"-l", "apache", "-c", "Google Inc.", "-y", "2016", tmp}
+		cargs := []string{"-l", "apache", "-c", "Google LLC", "-y", "2018", tmp}
 		c := exec.Command(os.Args[0], append(targs, cargs...)...)
 		c.Env = []string{"RUNME=1"}
 		if out, err := c.CombinedOutput(); err != nil {
