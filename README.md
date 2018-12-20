@@ -13,10 +13,11 @@ to any file that already has one.
 ## usage
 
     addlicense [flags] pattern [pattern ...]
-    
+
     -c copyright holder (default "Google LLC.")
+    -f custom license file (no default)
     -l license type: apache, bsd, mit (default "apache")
-    -y year (default 2016)
+    -y year (default "2018")
 
 The pattern argument can be provided multiple times, and may also refer
 to single files.
