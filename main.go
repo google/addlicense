@@ -25,6 +25,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -48,7 +49,7 @@ var (
 	holder   = flag.String("c", "Google LLC", "copyright holder")
 	license  = flag.String("l", "apache", "license type: apache, bsd, mit")
 	licensef = flag.String("f", "", "license file")
-	year     = flag.Int("y", time.Now().Year(), "year")
+	year     = flag.String("y", strconv.Itoa(time.Now().Year()), "year(s)")
 )
 
 func main() {
