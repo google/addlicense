@@ -63,3 +63,27 @@ func TestInitial(t *testing.T) {
 		run(t, "diff", "-r", filepath.Join(tmp, "initial"), "testdata/expected")
 	}
 }
+
+func TestMultiyear(t *testing.T) {
+	if os.Getenv("RUNME") != "" {
+		main()
+		return
+	}
+
+	tmp := tempDir(t)
+	t.Logf("tmp dir: %s", tmp)
+	samplefile := filepath.Join(tmp, "file.c")
+	const sampleLicensed = "testdata/multiyear_file.c"
+
+	run(t, "cp", "testdata/initial/file.c", samplefile)
+	cmd := exec.Command(os.Args[0],
+		"-test.run=TestMultiyear",
+		"-l", "bsd", "-c", "Google LLC",
+		"-y", "2015-2017,2019", samplefile,
+	)
+	cmd.Env = []string{"RUNME=1"}
+	if out, err := cmd.CombinedOutput(); err != nil {
+		t.Fatalf("%v\n%s", err, out)
+	}
+	run(t, "diff", samplefile, sampleLicensed)
+}
