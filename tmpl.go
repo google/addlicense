@@ -32,7 +32,7 @@ func init() {
 }
 
 type copyrightData struct {
-	Year   int
+	Year   string
 	Holder string
 }
 

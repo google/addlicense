@@ -48,7 +48,7 @@ var (
 	holder   = flag.String("c", "Google LLC", "copyright holder")
 	license  = flag.String("l", "apache", "license type: apache, bsd, mit")
 	licensef = flag.String("f", "", "license file")
-	year     = flag.Int("y", time.Now().Year(), "year")
+	year     = flag.String("y", fmt.Sprint(time.Now().Year()), "copyright year(s)")
 )
 
 func main() {
