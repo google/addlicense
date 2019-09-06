@@ -156,6 +156,8 @@ func addLicense(path string, fmode os.FileMode, tmpl *template.Template, data *c
 		lic, err = prefix(tmpl, data, "<!--", " ", "-->")
 	case ".php":
 		lic, err = prefix(tmpl, data, "<?php", "// ", "?>")
+	case ".ml", ".mli", ".mll", ".mly":
+		lic, err = prefix(tmpl, data, "(**", "   ", "*)")
 	}
 	if err != nil || lic == nil {
 		return err
