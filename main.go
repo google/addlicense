@@ -140,7 +140,7 @@ func addLicense(path string, fmode os.FileMode, tmpl *template.Template, data *c
 		return nil
 	case ".c", ".h":
 		lic, err = prefix(tmpl, data, "/*", " * ", " */")
-	case ".js", ".jsx", ".tsx", ".css", ".tf":
+	case ".js", ".jsx", ".tsx", ".css", ".tf", ".ts":
 		lic, err = prefix(tmpl, data, "/**", " * ", " */")
 	case ".cc", ".cpp", ".cs", ".go", ".hh", ".hpp", ".java", ".m", ".mm", ".proto", ".rs", ".scala", ".swift", ".dart", ".groovy", ".kt", ".kts":
 		lic, err = prefix(tmpl, data, "", "// ", "")
