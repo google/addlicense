@@ -49,6 +49,7 @@ var (
 	license  = flag.String("l", "apache", "license type: apache, bsd, mit")
 	licensef = flag.String("f", "", "license file")
 	year     = flag.String("y", fmt.Sprint(time.Now().Year()), "copyright year(s)")
+	verbose  = flag.Bool("v", false, "verbose mode: print the name of the files that are modified")
 )
 
 func main() {
@@ -95,11 +96,15 @@ func main() {
 		for f := range ch {
 			wg.Add(1)
 			go func(f *file) {
-				err := addLicense(f.path, f.mode, t, data)
+				defer wg.Done()
+				modified, err := addLicense(f.path, f.mode, t, data)
 				if err != nil {
 					log.Printf("%s: %v", f.path, err)
+					return
 				}
-				wg.Done()
+				if *verbose && modified {
+					log.Printf("%s modified", f.path)
+				}
 			}(f)
 		}
 		wg.Wait()
@@ -132,12 +137,12 @@ func walk(ch chan<- *file, start string) {
 	})
 }
 
-func addLicense(path string, fmode os.FileMode, tmpl *template.Template, data *copyrightData) error {
+func addLicense(path string, fmode os.FileMode, tmpl *template.Template, data *copyrightData) (bool, error) {
 	var lic []byte
 	var err error
 	switch fileExtension(path) {
 	default:
-		return nil
+		return false, nil
 	case ".c", ".h":
 		lic, err = prefix(tmpl, data, "/*", " * ", " */")
 	case ".js", ".jsx", ".tsx", ".css", ".tf", ".ts":
@@ -160,12 +165,12 @@ func addLicense(path string, fmode os.FileMode, tmpl *template.Template, data *c
 		lic, err = prefix(tmpl, data, "(**", "   ", "*)")
 	}
 	if err != nil || lic == nil {
-		return err
+		return false, err
 	}
 
 	b, err := ioutil.ReadFile(path)
 	if err != nil || hasLicense(b) {
-		return err
+		return false, err
 	}
 
 	line := hashBang(b)
@@ -177,7 +182,7 @@ func addLicense(path string, fmode os.FileMode, tmpl *template.Template, data *c
 		lic = append(line, lic...)
 	}
 	b = append(lic, b...)
-	return ioutil.WriteFile(path, b, fmode)
+	return true, ioutil.WriteFile(path, b, fmode)
 }
 
 func fileExtension(name string) string {
