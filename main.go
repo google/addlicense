@@ -45,10 +45,12 @@ Flags:
 `
 
 var (
-	holder   = flag.String("c", "Google LLC", "copyright holder")
-	license  = flag.String("l", "apache", "license type: apache, bsd, mit")
+	holder   = flag.String("c", "Netgain Technologies, LLC", "copyright holder")
+	license  = flag.String("l", "netgain", "license type: netgain, apache, bsd, mit")
+	purpose  = flag.String("p", "", "purpose of the code in the file")
 	licensef = flag.String("f", "", "license file")
 	year     = flag.String("y", fmt.Sprint(time.Now().Year()), "copyright year(s)")
+	author   = flag.String("a", "<replaceme>", "Author Name")
 	verbose  = flag.Bool("v", false, "verbose mode: print the name of the files that are modified")
 )
 
@@ -64,8 +66,10 @@ func main() {
 	}
 
 	data := &copyrightData{
-		Year:   *year,
-		Holder: *holder,
+		Year:    *year,
+		Holder:  *holder,
+		Purpose: *purpose,
+		Author:  *author,
 	}
 
 	var t *template.Template

@@ -26,14 +26,17 @@ import (
 var licenseTemplate = make(map[string]*template.Template)
 
 func init() {
+	licenseTemplate["netgain"] = template.Must(template.New("").Parse(tmplNETGAIN))
 	licenseTemplate["apache"] = template.Must(template.New("").Parse(tmplApache))
 	licenseTemplate["mit"] = template.Must(template.New("").Parse(tmplMIT))
 	licenseTemplate["bsd"] = template.Must(template.New("").Parse(tmplBSD))
 }
 
 type copyrightData struct {
-	Year   string
-	Holder string
+	Year    string
+	Holder  string
+	Purpose string
+	Author  string
 }
 
 // prefix will execute a license template t with data d
@@ -94,3 +97,7 @@ FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.`
+
+const tmplNETGAIN = `Copyright (c) {{.Year}} {{.Holder}} All rights reserved.
+Purpose: {{.Purpose}}
+Init Author: {{.Author}}.`
