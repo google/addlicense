@@ -26,8 +26,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 	"time"
+
+	"golang.org/x/sync/errgroup"
 )
 
 const helpText = `Usage: addlicense [flags] pattern [pattern ...]
@@ -92,23 +93,26 @@ func main() {
 	ch := make(chan *file, 1000)
 	done := make(chan struct{})
 	go func() {
-		var wg sync.WaitGroup
+		var wg errgroup.Group
 		for f := range ch {
-			wg.Add(1)
-			go func(f *file) {
-				defer wg.Done()
+			f := f // https://golang.org/doc/faq#closures_and_goroutines
+			wg.Go(func() error {
 				modified, err := addLicense(f.path, f.mode, t, data)
 				if err != nil {
 					log.Printf("%s: %v", f.path, err)
-					return
+					return err
 				}
 				if *verbose && modified {
 					log.Printf("%s modified", f.path)
 				}
-			}(f)
+				return nil
+			})
 		}
-		wg.Wait()
+		err := wg.Wait()
 		close(done)
+		if err != nil {
+			os.Exit(1)
+		}
 	}()
 
 	for _, d := range flag.Args() {
