@@ -18,6 +18,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"flag"
 	"fmt"
 	"html/template"
@@ -46,11 +47,12 @@ Flags:
 `
 
 var (
-	holder   = flag.String("c", "Google LLC", "copyright holder")
-	license  = flag.String("l", "apache", "license type: apache, bsd, mit")
-	licensef = flag.String("f", "", "license file")
-	year     = flag.String("y", fmt.Sprint(time.Now().Year()), "copyright year(s)")
-	verbose  = flag.Bool("v", false, "verbose mode: print the name of the files that are modified")
+	holder    = flag.String("c", "Google LLC", "copyright holder")
+	license   = flag.String("l", "apache", "license type: apache, bsd, mit")
+	licensef  = flag.String("f", "", "license file")
+	year      = flag.String("y", fmt.Sprint(time.Now().Year()), "copyright year(s)")
+	verbose   = flag.Bool("v", false, "verbose mode: print the name of the files that are modified")
+	checkonly = flag.Bool("check", false, "check only mode: verify presence of license headers and exit with non-zero code if missing")
 )
 
 func main() {
@@ -97,13 +99,35 @@ func main() {
 		for f := range ch {
 			f := f // https://golang.org/doc/faq#closures_and_goroutines
 			wg.Go(func() error {
-				modified, err := addLicense(f.path, f.mode, t, data)
-				if err != nil {
-					log.Printf("%s: %v", f.path, err)
-					return err
-				}
-				if *verbose && modified {
-					log.Printf("%s modified", f.path)
+				if *checkonly {
+					// Check if file extension is known
+					lic, err := licenseHeader(f.path, t, data)
+					if err != nil {
+						log.Printf("%s: %v", f.path, err)
+						return err
+					}
+					if lic == nil { // Unknown fileExtension
+						return nil
+					}
+					// Check if file has a license
+					isMissingLicenseHeader, err := fileHasLicense(f.path)
+					if err != nil {
+						log.Printf("%s: %v", f.path, err)
+						return err
+					}
+					if isMissingLicenseHeader {
+						fmt.Printf("%s\n", f.path)
+						return errors.New("missing license header")
+					}
+				} else {
+					modified, err := addLicense(f.path, f.mode, t, data)
+					if err != nil {
+						log.Printf("%s: %v", f.path, err)
+						return err
+					}
+					if *verbose && modified {
+						log.Printf("%s modified", f.path)
+					}
 				}
 				return nil
 			})
@@ -144,9 +168,43 @@ func walk(ch chan<- *file, start string) {
 func addLicense(path string, fmode os.FileMode, tmpl *template.Template, data *copyrightData) (bool, error) {
 	var lic []byte
 	var err error
+	lic, err = licenseHeader(path, tmpl, data)
+	if err != nil || lic == nil {
+		return false, err
+	}
+
+	b, err := ioutil.ReadFile(path)
+	if err != nil || hasLicense(b) {
+		return false, err
+	}
+
+	line := hashBang(b)
+	if len(line) > 0 {
+		b = b[len(line):]
+		if line[len(line)-1] != '\n' {
+			line = append(line, '\n')
+		}
+		lic = append(line, lic...)
+	}
+	b = append(lic, b...)
+	return true, ioutil.WriteFile(path, b, fmode)
+}
+
+// fileHasLicense reports whether the file at path contains a license header.
+func fileHasLicense(path string) (bool, error) {
+	b, err := ioutil.ReadFile(path)
+	if err != nil || hasLicense(b) {
+		return false, err
+	}
+	return true, nil
+}
+
+func licenseHeader(path string, tmpl *template.Template, data *copyrightData) ([]byte, error) {
+	var lic []byte
+	var err error
 	switch fileExtension(path) {
 	default:
-		return false, nil
+		return nil, nil
 	case ".c", ".h":
 		lic, err = prefix(tmpl, data, "/*", " * ", " */")
 	case ".js", ".jsx", ".tsx", ".css", ".tf", ".ts":
@@ -168,25 +226,7 @@ func addLicense(path string, fmode os.FileMode, tmpl *template.Template, data *c
 	case ".ml", ".mli", ".mll", ".mly":
 		lic, err = prefix(tmpl, data, "(**", "   ", "*)")
 	}
-	if err != nil || lic == nil {
-		return false, err
-	}
-
-	b, err := ioutil.ReadFile(path)
-	if err != nil || hasLicense(b) {
-		return false, err
-	}
-
-	line := hashBang(b)
-	if len(line) > 0 {
-		b = b[len(line):]
-		if line[len(line)-1] != '\n' {
-			line = append(line, '\n')
-		}
-		lic = append(line, lic...)
-	}
-	b = append(lic, b...)
-	return true, ioutil.WriteFile(path, b, fmode)
+	return lic, err
 }
 
 func fileExtension(name string) string {
