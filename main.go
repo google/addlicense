@@ -222,7 +222,7 @@ func licenseHeader(path string, tmpl *template.Template, data *copyrightData) ([
 	case ".html", ".xml":
 		lic, err = prefix(tmpl, data, "<!--", " ", "-->")
 	case ".php":
-		lic, err = prefix(tmpl, data, "<?php", "// ", "?>")
+		lic, err = prefix(tmpl, data, "", "// ", "")
 	case ".ml", ".mli", ".mll", ".mly":
 		lic, err = prefix(tmpl, data, "(**", "   ", "*)")
 	}
@@ -242,6 +242,7 @@ var head = []string{
 	"<!doctype",                // HTML doctype
 	"# encoding:",              // Ruby encoding
 	"# frozen_string_literal:", // Ruby interpreter instruction
+	"<?php",                    // PHP opening tag
 }
 
 func hashBang(b []byte) []byte {
