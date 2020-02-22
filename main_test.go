@@ -87,3 +87,100 @@ func TestMultiyear(t *testing.T) {
 	}
 	run(t, "diff", samplefile, sampleLicensed)
 }
+
+func TestWriteErrors(t *testing.T) {
+	if os.Getenv("RUNME") != "" {
+		main()
+		return
+	}
+
+	tmp := tempDir(t)
+	t.Logf("tmp dir: %s", tmp)
+	samplefile := filepath.Join(tmp, "file.c")
+
+	run(t, "cp", "testdata/initial/file.c", samplefile)
+	run(t, "chmod", "0444", samplefile)
+	cmd := exec.Command(os.Args[0],
+		"-test.run=TestWriteErrors",
+		"-l", "apache", "-c", "Google LLC", "-y", "2018",
+		samplefile,
+	)
+	cmd.Env = []string{"RUNME=1"}
+	out, err := cmd.CombinedOutput()
+	if err == nil {
+		run(t, "chmod", "0644", samplefile)
+		t.Fatalf("TestWriteErrors exited with a zero exit code.\n%s", out)
+	}
+	run(t, "chmod", "0644", samplefile)
+}
+
+func TestReadErrors(t *testing.T) {
+	if os.Getenv("RUNME") != "" {
+		main()
+		return
+	}
+
+	tmp := tempDir(t)
+	t.Logf("tmp dir: %s", tmp)
+	samplefile := filepath.Join(tmp, "file.c")
+
+	run(t, "cp", "testdata/initial/file.c", samplefile)
+	run(t, "chmod", "a-r", samplefile)
+	cmd := exec.Command(os.Args[0],
+		"-test.run=TestReadErrors",
+		"-l", "apache", "-c", "Google LLC", "-y", "2018",
+		samplefile,
+	)
+	cmd.Env = []string{"RUNME=1"}
+	out, err := cmd.CombinedOutput()
+	if err == nil {
+		run(t, "chmod", "0644", samplefile)
+		t.Fatalf("TestWriteErrors exited with a zero exit code.\n%s", out)
+	}
+	run(t, "chmod", "0644", samplefile)
+}
+
+func TestCheckSuccess(t *testing.T) {
+	if os.Getenv("RUNME") != "" {
+		main()
+		return
+	}
+
+	tmp := tempDir(t)
+	t.Logf("tmp dir: %s", tmp)
+	samplefile := filepath.Join(tmp, "file.c")
+
+	run(t, "cp", "testdata/expected/file.c", samplefile)
+	cmd := exec.Command(os.Args[0],
+		"-test.run=TestCheckSuccess",
+		"-l", "apache", "-c", "Google LLC", "-y", "2018",
+		"-check", samplefile,
+	)
+	cmd.Env = []string{"RUNME=1"}
+	if out, err := cmd.CombinedOutput(); err != nil {
+		t.Fatalf("%v\n%s", err, out)
+	}
+}
+
+func TestCheckFail(t *testing.T) {
+	if os.Getenv("RUNME") != "" {
+		main()
+		return
+	}
+
+	tmp := tempDir(t)
+	t.Logf("tmp dir: %s", tmp)
+	samplefile := filepath.Join(tmp, "file.c")
+
+	run(t, "cp", "testdata/initial/file.c", samplefile)
+	cmd := exec.Command(os.Args[0],
+		"-test.run=TestCheckFail",
+		"-l", "apache", "-c", "Google LLC", "-y", "2018",
+		"-check", samplefile,
+	)
+	cmd.Env = []string{"RUNME=1"}
+	out, err := cmd.CombinedOutput()
+	if err == nil {
+		t.Fatalf("TestCheckFail exited with a zero exit code.\n%s", out)
+	}
+}
