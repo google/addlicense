@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // This program ensures source code files have copyright license headers.
-// See usage with "addlicence -h".
+// See usage with "addlicense -h".
 package main
 
 import (
