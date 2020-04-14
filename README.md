@@ -16,7 +16,7 @@ to any file that already has one.
 
     -c copyright holder (defaults to "Google LLC")
     -f custom license file (no default)
-    -l license type: apache, bsd, mit (defaults to "apache")
+    -l license type: apache, bsd, mit, mpl (defaults to "apache")
     -y year (defaults to current year)
     -check check only mode: verify presence of license headers and exit with non-zero code if missing
 

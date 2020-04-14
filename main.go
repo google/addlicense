@@ -48,7 +48,7 @@ Flags:
 
 var (
 	holder    = flag.String("c", "Google LLC", "copyright holder")
-	license   = flag.String("l", "apache", "license type: apache, bsd, mit")
+	license   = flag.String("l", "apache", "license type: apache, bsd, mit, mpl")
 	licensef  = flag.String("f", "", "license file")
 	year      = flag.String("y", fmt.Sprint(time.Now().Year()), "copyright year(s)")
 	verbose   = flag.Bool("v", false, "verbose mode: print the name of the files that are modified")
@@ -267,5 +267,6 @@ func hasLicense(b []byte) bool {
 	if len(b) < 1000 {
 		n = len(b)
 	}
-	return bytes.Contains(bytes.ToLower(b[:n]), []byte("copyright"))
+	return bytes.Contains(bytes.ToLower(b[:n]), []byte("copyright")) ||
+		bytes.Contains(bytes.ToLower(b[:n]), []byte("mozilla public"))
 }
