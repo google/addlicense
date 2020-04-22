@@ -184,3 +184,25 @@ func TestCheckFail(t *testing.T) {
 		t.Fatalf("TestCheckFail exited with a zero exit code.\n%s", out)
 	}
 }
+
+func TestMPL(t *testing.T) {
+	if os.Getenv("RUNME") != "" {
+		main()
+		return
+	}
+
+	tmp := tempDir(t)
+	t.Logf("tmp dir: %s", tmp)
+	samplefile := filepath.Join(tmp, "file.c")
+
+	run(t, "cp", "testdata/expected/file.c", samplefile)
+	cmd := exec.Command(os.Args[0],
+		"-test.run=TestMPL",
+		"-l", "mpl", "-c", "Google LLC", "-y", "2018",
+		"-check", samplefile,
+	)
+	cmd.Env = []string{"RUNME=1"}
+	if out, err := cmd.CombinedOutput(); err != nil {
+		t.Fatalf("%v\n%s", err, out)
+	}
+}
