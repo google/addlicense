@@ -26,6 +26,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -110,12 +111,12 @@ func main() {
 						return nil
 					}
 					// Check if file has a license
-					isMissingLicenseHeader, err := fileHasLicense(f.path)
+					hasLicense, err := fileHasLicense(f.path)
 					if err != nil {
 						log.Printf("%s: %v", f.path, err)
 						return err
 					}
-					if isMissingLicenseHeader {
+					if !hasLicense {
 						fmt.Printf("%s\n", f.path)
 						return errors.New("missing license header")
 					}
@@ -165,6 +166,9 @@ func walk(ch chan<- *file, start string) {
 	})
 }
 
+// addLicense add a license to the file if missing.
+//
+// It returns true if the file was updated.
 func addLicense(path string, fmode os.FileMode, tmpl *template.Template, data *copyrightData) (bool, error) {
 	var lic []byte
 	var err error
@@ -174,7 +178,10 @@ func addLicense(path string, fmode os.FileMode, tmpl *template.Template, data *c
 	}
 
 	b, err := ioutil.ReadFile(path)
-	if err != nil || hasLicense(b) {
+	if err != nil {
+		return false, err
+	}
+	if hasLicense(b) || isGenerated(b) {
 		return false, err
 	}
 
@@ -193,10 +200,11 @@ func addLicense(path string, fmode os.FileMode, tmpl *template.Template, data *c
 // fileHasLicense reports whether the file at path contains a license header.
 func fileHasLicense(path string) (bool, error) {
 	b, err := ioutil.ReadFile(path)
-	if err != nil || hasLicense(b) {
+	if err != nil {
 		return false, err
 	}
-	return true, nil
+	// If generated, we count it as if it has a license.
+	return hasLicense(b) || isGenerated(b), nil
 }
 
 func licenseHeader(path string, tmpl *template.Template, data *copyrightData) ([]byte, error) {
@@ -260,6 +268,14 @@ func hashBang(b []byte) []byte {
 		}
 	}
 	return nil
+}
+
+var reGenerated = regexp.MustCompile(`(?m)^.{1,2} Code generated .* DO NOT EDIT\.$`)
+
+// isGenerated returns true if it contains a string that implies the file was
+// generated.
+func isGenerated(b []byte) bool {
+	return reGenerated.Match(b)
 }
 
 func hasLicense(b []byte) bool {
