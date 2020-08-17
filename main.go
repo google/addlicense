@@ -219,13 +219,13 @@ func licenseHeader(path string, tmpl *template.Template, data *copyrightData) ([
 		lic, err = prefix(tmpl, data, "/**", " * ", " */")
 	case ".cc", ".cpp", ".cs", ".go", ".hh", ".hpp", ".java", ".m", ".mm", ".proto", ".rs", ".scala", ".swift", ".dart", ".groovy", ".kt", ".kts", ".v", ".sv":
 		lic, err = prefix(tmpl, data, "", "// ", "")
-	case ".py", ".sh", ".yaml", ".yml", ".dockerfile", "dockerfile", ".rb", "gemfile", ".tcl":
+	case ".py", ".sh", ".yaml", ".yml", ".dockerfile", "dockerfile", ".rb", "gemfile", ".tcl", ".bzl":
 		lic, err = prefix(tmpl, data, "", "# ", "")
 	case ".el", ".lisp":
 		lic, err = prefix(tmpl, data, "", ";; ", "")
 	case ".erl":
 		lic, err = prefix(tmpl, data, "", "% ", "")
-	case ".hs", ".sql":
+	case ".hs", ".sql", ".sdl":
 		lic, err = prefix(tmpl, data, "", "-- ", "")
 	case ".html", ".xml", ".vue":
 		lic, err = prefix(tmpl, data, "<!--", " ", "-->")
