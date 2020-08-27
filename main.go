@@ -270,12 +270,15 @@ func hashBang(b []byte) []byte {
 	return nil
 }
 
-var reGenerated = regexp.MustCompile(`(?m)^.{1,2} Code generated .* DO NOT EDIT\.$`)
+// go generate: ^// Code generated .* DO NOT EDIT\.$
+var goGenerated = regexp.MustCompile(`(?m)^.{1,2} Code generated .* DO NOT EDIT\.$`)
+// cargo raze: ^DO NOT EDIT! Replaced on runs of cargo-raze$
+var cargoRazeGenerated = regexp.MustCompile(`(?m)^DO NOT EDIT! Replaced on runs of cargo-raze$`)
 
 // isGenerated returns true if it contains a string that implies the file was
 // generated.
 func isGenerated(b []byte) bool {
-	return reGenerated.Match(b)
+	return goGenerated.Match(b) || cargoRazeGenerated.Match(b)
 }
 
 func hasLicense(b []byte) bool {
