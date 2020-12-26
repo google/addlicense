@@ -21,13 +21,13 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"html/template"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
+	"text/template"
 	"time"
 
 	"golang.org/x/sync/errgroup"
@@ -272,6 +272,7 @@ func hashBang(b []byte) []byte {
 
 // go generate: ^// Code generated .* DO NOT EDIT\.$
 var goGenerated = regexp.MustCompile(`(?m)^.{1,2} Code generated .* DO NOT EDIT\.$`)
+
 // cargo raze: ^DO NOT EDIT! Replaced on runs of cargo-raze$
 var cargoRazeGenerated = regexp.MustCompile(`(?m)^DO NOT EDIT! Replaced on runs of cargo-raze$`)
 

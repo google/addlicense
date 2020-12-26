@@ -18,8 +18,8 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"html/template"
 	"strings"
+	"text/template"
 	"unicode"
 )
 
