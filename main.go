@@ -94,7 +94,7 @@ func main() {
 
 	// process at most 1000 files in parallel
 	ch := make(chan *file, 1000)
-	done := make(chan struct{})
+	done := make(chan error)
 	go func() {
 		var wg errgroup.Group
 		for f := range ch {
@@ -133,18 +133,17 @@ func main() {
 				return nil
 			})
 		}
-		err := wg.Wait()
-		close(done)
-		if err != nil {
-			os.Exit(1)
-		}
+		done <- wg.Wait()
 	}()
 
 	for _, d := range flag.Args() {
 		walk(ch, d)
 	}
 	close(ch)
-	<-done
+	if err := <-done; err != nil {
+		fmt.Printf("error: %s\n", err)
+		os.Exit(1)
+	}
 }
 
 type file struct {
