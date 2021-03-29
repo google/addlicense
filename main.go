@@ -219,7 +219,13 @@ func licenseHeader(path string, tmpl *template.Template, data *copyrightData) ([
 		lic, err = prefix(tmpl, data, "/**", " * ", " */")
 	case ".cc", ".cpp", ".cs", ".go", ".hh", ".hpp", ".java", ".m", ".mm", ".proto", ".rs", ".scala", ".swift", ".dart", ".groovy", ".kt", ".kts", ".v", ".sv":
 		lic, err = prefix(tmpl, data, "", "// ", "")
-	case ".py", ".sh", ".yaml", ".yml", ".dockerfile", "dockerfile", ".rb", "gemfile", ".tcl", ".bzl":
+	case ".txt", ".in":
+		matchedCMakeConfig, _ := filepath.Match("*.cmake.in", fileBase(path))
+		if fileBase(path) != "cmakelists.txt" && !matchedCMakeConfig {
+			return nil, nil
+		}
+		fallthrough
+	case ".py", ".sh", ".yaml", ".yml", ".dockerfile", "dockerfile", ".rb", "gemfile", ".tcl", ".bzl", ".cmake":
 		lic, err = prefix(tmpl, data, "", "# ", "")
 	case ".el", ".lisp":
 		lic, err = prefix(tmpl, data, "", ";; ", "")
@@ -237,11 +243,15 @@ func licenseHeader(path string, tmpl *template.Template, data *copyrightData) ([
 	return lic, err
 }
 
+func fileBase(name string) string {
+	return strings.ToLower(filepath.Base(name))
+}
+
 func fileExtension(name string) string {
 	if v := filepath.Ext(name); v != "" {
 		return strings.ToLower(v)
 	}
-	return strings.ToLower(filepath.Base(name))
+	return fileBase(name)
 }
 
 var head = []string{
