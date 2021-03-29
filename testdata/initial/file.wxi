@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<Include xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <?define HelloWorld = "$(var.HelloWorld)" ?>
+</Include>
