@@ -1,10 +1,10 @@
-FROM golang:1-alpine AS build-env
+FROM golang:1-alpine
 
 RUN apk add --no-cache --upgrade git openssh-client ca-certificates
-RUN go get -u github.com/golang/dep/cmd/dep
+
+COPY . /go/src/app
 WORKDIR /go/src/app
 
-# Install
-RUN go get -u github.com/google/addlicense
+RUN go build -o addlicense ./...
 
 ENTRYPOINT ["addlicense"]

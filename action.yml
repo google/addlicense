@@ -1,0 +1,27 @@
+name: 'Apply license headers'
+author: 'nordcloud'
+branding:
+  icon: 'git-branch'
+  color: 'gray-dark'
+description: 'Check and add missing license headers.'
+inputs:
+  copyright-holder:
+    description: 'The name of the copyright holder.'
+    required: true
+    default: 'Nordcloud Oy'
+  directory-pattern:
+    description: 'The directory pattern to scan.'
+    required: true
+    default: '.'
+  license-template:
+    description: 'The license template file context.'
+    required: true
+    default: Copyright {{.Year}} {{.Holder}} or its affiliates. All Rights Reserved.
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  entrypoint: 'entrypoint.sh'
+  env:
+    TEMPLATE: ${{ license-template }}
+    HOLDER: ${{ inputs.copyright-holder }}
+    PATTERN: ${{ inputs.directory-pattern }}
