@@ -20,7 +20,7 @@ inputs:
 runs:
   using: 'docker'
   image: 'Dockerfile'
-  entrypoint: 'entrypoint.sh'
+  entrypoint: '/go/src/app/entrypoint.sh'
   env:
     TEMPLATE: ${{ inputs.license-template }}
     HOLDER: ${{ inputs.copyright-holder }}
