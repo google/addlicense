@@ -22,6 +22,6 @@ runs:
   image: 'Dockerfile'
   entrypoint: 'entrypoint.sh'
   env:
-    TEMPLATE: ${{ license-template }}
+    TEMPLATE: ${{ inputs.license-template }}
     HOLDER: ${{ inputs.copyright-holder }}
     PATTERN: ${{ inputs.directory-pattern }}
