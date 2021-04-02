@@ -52,6 +52,7 @@ var (
 	license   = flag.String("l", "apache", "license type: apache, bsd, mit, mpl")
 	licensef  = flag.String("f", "", "license file")
 	year      = flag.String("y", fmt.Sprint(time.Now().Year()), "copyright year(s)")
+	exclude   = flag.String("e", "", "Files which exclude from check")
 	verbose   = flag.Bool("v", false, "verbose mode: print the name of the files that are modified")
 	checkonly = flag.Bool("check", false, "check only mode: verify presence of license headers and exit with non-zero code if missing")
 )
@@ -140,8 +141,10 @@ func main() {
 		}
 	}()
 
+	excludePath := NewExcludePaths(*exclude)
+
 	for _, d := range flag.Args() {
-		walk(ch, d)
+		walk(ch, d, excludePath)
 	}
 	close(ch)
 	<-done
@@ -152,7 +155,7 @@ type file struct {
 	mode os.FileMode
 }
 
-func walk(ch chan<- *file, start string) {
+func walk(ch chan<- *file, start string, excludePath *ExcludePath) {
 	filepath.Walk(start, func(path string, fi os.FileInfo, err error) error {
 		if err != nil {
 			log.Printf("%s error: %v", path, err)
@@ -161,9 +164,32 @@ func walk(ch chan<- *file, start string) {
 		if fi.IsDir() {
 			return nil
 		}
+		if excludePath.Contains(path) {
+			log.Printf("%s skipped", path)
+			return nil
+		}
 		ch <- &file{path, fi.Mode()}
 		return nil
 	})
+}
+
+type ExcludePath struct {
+	paths []string
+}
+
+func NewExcludePaths(arg string) *ExcludePath {
+	return &ExcludePath{
+		paths: strings.Split(arg, ","),
+	}
+}
+
+func (e *ExcludePath) Contains(path string) bool {
+	for _, p := range e.paths {
+		if p == path {
+			return true
+		}
+	}
+	return false
 }
 
 // addLicense add a license to the file if missing.
@@ -272,6 +298,7 @@ func hashBang(b []byte) []byte {
 
 // go generate: ^// Code generated .* DO NOT EDIT\.$
 var goGenerated = regexp.MustCompile(`(?m)^.{1,2} Code generated .* DO NOT EDIT\.$`)
+
 // cargo raze: ^DO NOT EDIT! Replaced on runs of cargo-raze$
 var cargoRazeGenerated = regexp.MustCompile(`(?m)^DO NOT EDIT! Replaced on runs of cargo-raze$`)
 
