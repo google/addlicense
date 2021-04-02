@@ -206,3 +206,33 @@ func TestMPL(t *testing.T) {
 		t.Fatalf("%v\n%s", err, out)
 	}
 }
+
+func TestExcludePath(t *testing.T) {
+	if os.Getenv("RUNME") != "" {
+		main()
+		return
+	}
+
+	tmp := tempDir(t)
+	t.Logf("tmp dir: %s", tmp)
+
+	origin1 := filepath.Join(tmp, "file.c")
+	origin2 := filepath.Join(tmp, "file.h")
+	expected1 := "testdata/initial/file.c"
+	expected2 := "testdata/expected/file.h"
+
+	run(t, "cp", "testdata/initial/file.c", origin1)
+	run(t, "cp", "testdata/initial/file.h", origin2)
+
+	cmd := exec.Command(os.Args[0],
+		"-test.run=TestExcludePath",
+		"-y", "2018", "-e", origin1, origin1, origin2,
+	)
+	cmd.Env = []string{"RUNME=1"}
+	if out, err := cmd.CombinedOutput(); err != nil {
+		t.Fatalf("%v\n%s", err, out)
+	}
+
+	run(t, "diff", origin1, expected1)
+	run(t, "diff", origin2, expected2)
+}
