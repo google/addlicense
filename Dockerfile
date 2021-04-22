@@ -1,6 +1,7 @@
 FROM golang:1-alpine AS build-env
 
 RUN apk add --no-cache --upgrade git openssh-client ca-certificates
+RUN go env -w GO111MODULE=off
 RUN go get -u github.com/golang/dep/cmd/dep
 WORKDIR /go/src/app
 
