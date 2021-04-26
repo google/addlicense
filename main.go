@@ -115,10 +115,9 @@ func main() {
 		for f := range ch {
 			f := f // https://golang.org/doc/faq#closures_and_goroutines
 			wg.Go(func() error {
-				for _, skipf := range sanitizedList {
-					if strings.Contains(f.path, skipf) {
-						return nil
-					}
+				// if the file is to be skipped then do nothing
+				if isSkipped(f.path, &sanitizedList) {
+					return nil
 				}
 
 				if *checkonly {
@@ -310,4 +309,14 @@ func hasLicense(b []byte) bool {
 	}
 	return bytes.Contains(bytes.ToLower(b[:n]), []byte("copyright")) ||
 		bytes.Contains(bytes.ToLower(b[:n]), []byte("mozilla public"))
+}
+
+// checks if the current path contains a directory, file or path in the skipList
+func isSkipped(path string, skipList *[]string) bool {
+	for _, skipf := range *skipList {
+		if strings.Contains(path, skipf) {
+			return true
+		}
+	}
+	return false
 }
