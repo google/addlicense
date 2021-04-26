@@ -206,3 +206,33 @@ func TestMPL(t *testing.T) {
 		t.Fatalf("%v\n%s", err, out)
 	}
 }
+
+func TestSkipFilesl(t *testing.T) {
+	if os.Getenv("RUNME") != "" {
+		main()
+		return
+	}
+
+	tmp := tempDir(t)
+	t.Logf("tmp dir: %s", tmp)
+	run(t, "cp", "-r", "testdata/skip_files_samples/initial", tmp)
+
+	// run at least 2 times to ensure the program is idempotent
+	for i := 0; i < 2; i++ {
+		t.Logf("run #%d", i)
+		targs := []string{"-test.run=TestSkipFilesl"}
+		cargs := []string{
+			"-l", "apache",
+			"-c", "Google LLC",
+			"-y", "2018",
+			"-s", "skip_anywhere.html,foo-2/skip_only_in_foo,skip-dir,bar/skip_in_bar.groovy",
+			tmp}
+		c := exec.Command(os.Args[0], append(targs, cargs...)...)
+		c.Env = []string{"RUNME=1"}
+		if out, err := c.CombinedOutput(); err != nil {
+			t.Fatalf("%v\n%s", err, out)
+		}
+
+		run(t, "diff", "-r", filepath.Join(tmp, "initial"), "testdata/skip_files_samples/expected")
+	}
+}

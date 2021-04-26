@@ -54,6 +54,12 @@ var (
 	year      = flag.String("y", fmt.Sprint(time.Now().Year()), "copyright year(s)")
 	verbose   = flag.Bool("v", false, "verbose mode: print the name of the files that are modified")
 	checkonly = flag.Bool("check", false, "check only mode: verify presence of license headers and exit with non-zero code if missing")
+	skipf     = flag.String("s", "",
+		`comma separated list of files/directories to skip;
+	* simply does a path.contains() check for all given values; hence the following are to be noted:
+	* if more than one subdirectory with the same name exists then the one to be skipped should have path prefixed up until non matching parent
+	* file names should have extensions and if two files have the same name then the skipped one should be prefixed upto the first non-matching directory name
+	* example: addlicense -s testf.c,testf.xml,./foo/bar/zoo,./.github`)
 )
 
 func main() {
@@ -70,6 +76,15 @@ func main() {
 	data := &copyrightData{
 		Year:   *year,
 		Holder: *holder,
+	}
+
+	var sanitizedList []string
+	skipList := strings.Split(*skipf, ",")
+	for _, f := range skipList {
+		sanitized := strings.Replace(f, "./", "", 1)
+		if sanitized != "" {
+			sanitizedList = append(sanitizedList, sanitized)
+		}
 	}
 
 	var t *template.Template
@@ -100,6 +115,12 @@ func main() {
 		for f := range ch {
 			f := f // https://golang.org/doc/faq#closures_and_goroutines
 			wg.Go(func() error {
+				for _, skipf := range sanitizedList {
+					if strings.Contains(f.path, skipf) {
+						return nil
+					}
+				}
+
 				if *checkonly {
 					// Check if file extension is known
 					lic, err := licenseHeader(f.path, t, data)
@@ -272,6 +293,7 @@ func hashBang(b []byte) []byte {
 
 // go generate: ^// Code generated .* DO NOT EDIT\.$
 var goGenerated = regexp.MustCompile(`(?m)^.{1,2} Code generated .* DO NOT EDIT\.$`)
+
 // cargo raze: ^DO NOT EDIT! Replaced on runs of cargo-raze$
 var cargoRazeGenerated = regexp.MustCompile(`(?m)^DO NOT EDIT! Replaced on runs of cargo-raze$`)
 
