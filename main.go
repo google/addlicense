@@ -48,6 +48,8 @@ Flags:
 `
 
 var (
+	skipExtensionFlags skipExtensionFlag
+
 	holder    = flag.String("c", "Google LLC", "copyright holder")
 	license   = flag.String("l", "apache", "license type: apache, bsd, mit, mpl")
 	licensef  = flag.String("f", "", "license file")
@@ -56,11 +58,23 @@ var (
 	checkonly = flag.Bool("check", false, "check only mode: verify presence of license headers and exit with non-zero code if missing")
 )
 
+type skipExtensionFlag []string
+
+func (i *skipExtensionFlag) String() string {
+	return fmt.Sprint(*i)
+}
+
+func (i *skipExtensionFlag) Set(value string) error {
+	*i = append(*i, value)
+	return nil
+}
+
 func main() {
 	flag.Usage = func() {
 		fmt.Fprintln(os.Stderr, helpText)
 		flag.PrintDefaults()
 	}
+	flag.Var(&skipExtensionFlags, "skip", "To skip files to check/add the header file, for example: -skip rb -skip go")
 	flag.Parse()
 	if flag.NArg() == 0 {
 		flag.Usage()
@@ -160,6 +174,12 @@ func walk(ch chan<- *file, start string) {
 		}
 		if fi.IsDir() {
 			return nil
+		}
+		for _, skip := range skipExtensionFlags {
+			if strings.TrimPrefix(filepath.Ext(fi.Name()), ".") == skip || fi.Name() == skip {
+				log.Printf("%s: skipping this file", fi.Name())
+				return nil
+			}
 		}
 		ch <- &file{path, fi.Mode()}
 		return nil
@@ -272,6 +292,7 @@ func hashBang(b []byte) []byte {
 
 // go generate: ^// Code generated .* DO NOT EDIT\.$
 var goGenerated = regexp.MustCompile(`(?m)^.{1,2} Code generated .* DO NOT EDIT\.$`)
+
 // cargo raze: ^DO NOT EDIT! Replaced on runs of cargo-raze$
 var cargoRazeGenerated = regexp.MustCompile(`(?m)^DO NOT EDIT! Replaced on runs of cargo-raze$`)
 
