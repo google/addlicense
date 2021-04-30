@@ -53,7 +53,7 @@ func TestInitial(t *testing.T) {
 	for i := 0; i < 2; i++ {
 		t.Logf("run #%d", i)
 		targs := []string{"-test.run=TestInitial"}
-		cargs := []string{"-l", "apache", "-c", "Google LLC", "-y", "2018", tmp}
+		cargs := []string{"-l", "apache", "-c", "O'liver", "-y", "2018", tmp}
 		c := exec.Command(os.Args[0], append(targs, cargs...)...)
 		c.Env = []string{"RUNME=1"}
 		if out, err := c.CombinedOutput(); err != nil {
@@ -78,7 +78,7 @@ func TestMultiyear(t *testing.T) {
 	run(t, "cp", "testdata/initial/file.c", samplefile)
 	cmd := exec.Command(os.Args[0],
 		"-test.run=TestMultiyear",
-		"-l", "bsd", "-c", "Google LLC",
+		"-l", "bsd", "-c", "O'liver",
 		"-y", "2015-2017,2019", samplefile,
 	)
 	cmd.Env = []string{"RUNME=1"}
@@ -102,7 +102,7 @@ func TestWriteErrors(t *testing.T) {
 	run(t, "chmod", "0444", samplefile)
 	cmd := exec.Command(os.Args[0],
 		"-test.run=TestWriteErrors",
-		"-l", "apache", "-c", "Google LLC", "-y", "2018",
+		"-l", "apache", "-c", "O'liver", "-y", "2018",
 		samplefile,
 	)
 	cmd.Env = []string{"RUNME=1"}
@@ -128,7 +128,7 @@ func TestReadErrors(t *testing.T) {
 	run(t, "chmod", "a-r", samplefile)
 	cmd := exec.Command(os.Args[0],
 		"-test.run=TestReadErrors",
-		"-l", "apache", "-c", "Google LLC", "-y", "2018",
+		"-l", "apache", "-c", "O'liver", "-y", "2018",
 		samplefile,
 	)
 	cmd.Env = []string{"RUNME=1"}
@@ -153,7 +153,7 @@ func TestCheckSuccess(t *testing.T) {
 	run(t, "cp", "testdata/expected/file.c", samplefile)
 	cmd := exec.Command(os.Args[0],
 		"-test.run=TestCheckSuccess",
-		"-l", "apache", "-c", "Google LLC", "-y", "2018",
+		"-l", "apache", "-c", "O'liver", "-y", "2018",
 		"-check", samplefile,
 	)
 	cmd.Env = []string{"RUNME=1"}
@@ -175,7 +175,7 @@ func TestCheckFail(t *testing.T) {
 	run(t, "cp", "testdata/initial/file.c", samplefile)
 	cmd := exec.Command(os.Args[0],
 		"-test.run=TestCheckFail",
-		"-l", "apache", "-c", "Google LLC", "-y", "2018",
+		"-l", "apache", "-c", "O'liver", "-y", "2018",
 		"-check", samplefile,
 	)
 	cmd.Env = []string{"RUNME=1"}
@@ -198,7 +198,7 @@ func TestMPL(t *testing.T) {
 	run(t, "cp", "testdata/expected/file.c", samplefile)
 	cmd := exec.Command(os.Args[0],
 		"-test.run=TestMPL",
-		"-l", "mpl", "-c", "Google LLC", "-y", "2018",
+		"-l", "mpl", "-c", "O'liver", "-y", "2018",
 		"-check", samplefile,
 	)
 	cmd.Env = []string{"RUNME=1"}
