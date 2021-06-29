@@ -52,6 +52,7 @@ var (
 
 	holder    = flag.String("c", "Google LLC", "copyright holder")
 	license   = flag.String("l", "apache", "license type: apache, bsd, mit, mpl")
+	spdxid    = flag.Bool("s", false, "add SPDX license identifer to (apache, mit, mpl) license templates")
 	licensef  = flag.String("f", "", "license file")
 	year      = flag.String("y", fmt.Sprint(time.Now().Year()), "copyright year(s)")
 	verbose   = flag.Bool("v", false, "verbose mode: print the name of the files that are modified")
@@ -84,6 +85,7 @@ func main() {
 	data := &copyrightData{
 		Year:   *year,
 		Holder: *holder,
+		SPDX:   *spdxid,
 	}
 
 	var t *template.Template
