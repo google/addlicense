@@ -35,6 +35,7 @@ func init() {
 type copyrightData struct {
 	Year   string
 	Holder string
+	SPDX   bool
 }
 
 // prefix will execute a license template t with data d
@@ -71,7 +72,9 @@ Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
-limitations under the License.`
+limitations under the License.{{ if .SPDX }}
+
+SPDX-License-Identifier: Apache-2.0{{ end }}`
 
 const tmplBSD = `Copyright (c) {{.Year}} {{.Holder}} All rights reserved.
 Use of this source code is governed by a BSD-style
@@ -94,8 +97,12 @@ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.`
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.{{ if .SPDX }}
+
+SPDX-License-Identifier: MIT{{ end }}`
 
 const tmplMPL = `This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
-file, You can obtain one at https://mozilla.org/MPL/2.0/.`
+file, You can obtain one at https://mozilla.org/MPL/2.0/.{{ if .SPDX }}
+
+SPDX-License-Identifier: MPL-2.0{{ end }}`
