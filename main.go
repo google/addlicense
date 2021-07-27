@@ -178,7 +178,9 @@ func main() {
 	}()
 
 	for _, d := range flag.Args() {
-		walk(ch, d)
+		if err := walk(ch, d); err != nil {
+			log.Fatal(err)
+		}
 	}
 	close(ch)
 	<-done
@@ -189,8 +191,8 @@ type file struct {
 	mode os.FileMode
 }
 
-func walk(ch chan<- *file, start string) {
-	filepath.Walk(start, func(path string, fi os.FileInfo, err error) error {
+func walk(ch chan<- *file, start string) error {
+	return filepath.Walk(start, func(path string, fi os.FileInfo, err error) error {
 		if err != nil {
 			log.Printf("%s error: %v", path, err)
 			return nil

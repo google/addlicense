@@ -68,7 +68,7 @@ func fetchTemplate(license string, templateFile string, spdx spdxFlag) (string, 
 				// unknown license, but SPDX headers requested
 				t = tmplSPDX
 			} else {
-				return "", fmt.Errorf("unknown license: %q. Include the '-s' flag to request SPDX style headers using this license.", license)
+				return "", fmt.Errorf("unknown license: %q. Include the '-s' flag to request SPDX style headers using this license", license)
 			}
 		} else if spdx == spdxOn {
 			// append spdx headers to recognized license
