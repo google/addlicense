@@ -19,27 +19,50 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
+	"io/ioutil"
 	"strings"
 	"unicode"
 )
 
-var licenseTemplate = make(map[string]*template.Template)
-
-func init() {
-	licenseTemplate["apache"] = template.Must(template.New("").Parse(tmplApache))
-	licenseTemplate["mit"] = template.Must(template.New("").Parse(tmplMIT))
-	licenseTemplate["bsd"] = template.Must(template.New("").Parse(tmplBSD))
-	licenseTemplate["mpl"] = template.Must(template.New("").Parse(tmplMPL))
+var licenseTemplate = map[string]string{
+	"apache": tmplApache,
+	"mit":    tmplMIT,
+	"bsd":    tmplBSD,
+	"mpl":    tmplMPL,
 }
 
-type copyrightData struct {
-	Year   string
-	Holder string
+// licenseData specifies the data used to fill out a license template.
+type licenseData struct {
+	Year   string // Copyright year(s).
+	Holder string // Name of the copyright holder.
 }
 
-// prefix will execute a license template t with data d
+// fetchTemplate returns the license template for the specified license and
+// optional templateFile. If templateFile is provided, the license is read
+// from the specified file. Otherwise, a template is loaded for the specified
+// license, if recognized.
+func fetchTemplate(license string, templateFile string) (string, error) {
+	var t string
+	if templateFile != "" {
+		d, err := ioutil.ReadFile(templateFile)
+		if err != nil {
+			return "", fmt.Errorf("license file: %w", err)
+		}
+
+		t = string(d)
+	} else {
+		t = licenseTemplate[license]
+		if t == "" {
+			return "", fmt.Errorf("unknown license: %q", license)
+		}
+	}
+
+	return t, nil
+}
+
+// executeTemplate will execute a license template t with data d
 // and prefix the result with top, middle and bottom.
-func prefix(t *template.Template, d *copyrightData, top, mid, bot string) ([]byte, error) {
+func executeTemplate(t *template.Template, d licenseData, top, mid, bot string) ([]byte, error) {
 	var buf bytes.Buffer
 	if err := t.Execute(&buf, d); err != nil {
 		return nil, err
