@@ -49,6 +49,7 @@ Flags:
 
 var (
 	skipExtensionFlags skipExtensionFlag
+	spdx               spdxFlag
 
 	holder    = flag.String("c", "Google LLC", "copyright holder")
 	license   = flag.String("l", "apache", "license type: apache, bsd, mit, mpl")
@@ -57,6 +58,15 @@ var (
 	verbose   = flag.Bool("v", false, "verbose mode: print the name of the files that are modified")
 	checkonly = flag.Bool("check", false, "check only mode: verify presence of license headers and exit with non-zero code if missing")
 )
+
+func init() {
+	flag.Usage = func() {
+		fmt.Fprintln(os.Stderr, helpText)
+		flag.PrintDefaults()
+	}
+	flag.Var(&skipExtensionFlags, "skip", "To skip files to check/add the header file, for example: -skip rb -skip go")
+	flag.Var(&spdx, "s", "Include SPDX identifier in license header. Set -s=only to only include SPDX identifier.")
+}
 
 type skipExtensionFlag []string
 
@@ -69,41 +79,54 @@ func (i *skipExtensionFlag) Set(value string) error {
 	return nil
 }
 
-func main() {
-	flag.Usage = func() {
-		fmt.Fprintln(os.Stderr, helpText)
-		flag.PrintDefaults()
+// spdxFlag defines the line flag behavior for specifying SPDX support.
+type spdxFlag string
+
+const (
+	spdxOff  spdxFlag = ""
+	spdxOn   spdxFlag = "true" // value set by flag package on bool flag
+	spdxOnly spdxFlag = "only"
+)
+
+// IsBoolFlag causes a bare '-s' flag to be set as the string 'true'.  This
+// allows the use of the bare '-s' or setting a string '-s=only'.
+func (i *spdxFlag) IsBoolFlag() bool { return true }
+func (i *spdxFlag) String() string   { return string(*i) }
+
+func (i *spdxFlag) Set(value string) error {
+	v := spdxFlag(value)
+	if v != spdxOn && v != spdxOnly {
+		return fmt.Errorf("error: flag 's' expects '%v' or '%v'", spdxOn, spdxOnly)
 	}
-	flag.Var(&skipExtensionFlags, "skip", "To skip files to check/add the header file, for example: -skip rb -skip go")
+	*i = v
+	return nil
+}
+
+func main() {
 	flag.Parse()
 	if flag.NArg() == 0 {
 		flag.Usage()
 		os.Exit(1)
 	}
 
-	data := &copyrightData{
-		Year:   *year,
-		Holder: *holder,
+	// map legacy license values
+	if t, ok := legacyLicenseTypes[*license]; ok {
+		*license = t
 	}
 
-	var t *template.Template
-	if *licensef != "" {
-		d, err := ioutil.ReadFile(*licensef)
-		if err != nil {
-			log.Printf("license file: %v", err)
-			os.Exit(1)
-		}
-		t, err = template.New("").Parse(string(d))
-		if err != nil {
-			log.Printf("license file: %v", err)
-			os.Exit(1)
-		}
-	} else {
-		t = licenseTemplate[*license]
-		if t == nil {
-			log.Printf("unknown license: %s", *license)
-			os.Exit(1)
-		}
+	data := licenseData{
+		Year:   *year,
+		Holder: *holder,
+		SPDXID: *license,
+	}
+
+	tpl, err := fetchTemplate(*license, *licensef, spdx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	t, err := template.New("").Parse(tpl)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	// process at most 1000 files in parallel
@@ -189,7 +212,7 @@ func walk(ch chan<- *file, start string) {
 // addLicense add a license to the file if missing.
 //
 // It returns true if the file was updated.
-func addLicense(path string, fmode os.FileMode, tmpl *template.Template, data *copyrightData) (bool, error) {
+func addLicense(path string, fmode os.FileMode, tmpl *template.Template, data licenseData) (bool, error) {
 	var lic []byte
 	var err error
 	lic, err = licenseHeader(path, tmpl, data)
@@ -227,32 +250,32 @@ func fileHasLicense(path string) (bool, error) {
 	return hasLicense(b) || isGenerated(b), nil
 }
 
-func licenseHeader(path string, tmpl *template.Template, data *copyrightData) ([]byte, error) {
+func licenseHeader(path string, tmpl *template.Template, data licenseData) ([]byte, error) {
 	var lic []byte
 	var err error
 	switch fileExtension(path) {
 	default:
 		return nil, nil
 	case ".c", ".h", ".gv":
-		lic, err = prefix(tmpl, data, "/*", " * ", " */")
+		lic, err = executeTemplate(tmpl, data, "/*", " * ", " */")
 	case ".js", ".mjs", ".cjs", ".jsx", ".tsx", ".css", ".scss", ".sass", ".tf", ".ts":
-		lic, err = prefix(tmpl, data, "/**", " * ", " */")
+		lic, err = executeTemplate(tmpl, data, "/**", " * ", " */")
 	case ".cc", ".cpp", ".cs", ".go", ".hh", ".hpp", ".java", ".m", ".mm", ".proto", ".rs", ".scala", ".swift", ".dart", ".groovy", ".kt", ".kts", ".v", ".sv":
-		lic, err = prefix(tmpl, data, "", "// ", "")
+		lic, err = executeTemplate(tmpl, data, "", "// ", "")
 	case ".py", ".sh", ".yaml", ".yml", ".dockerfile", "dockerfile", ".rb", "gemfile", ".tcl", ".bzl":
-		lic, err = prefix(tmpl, data, "", "# ", "")
+		lic, err = executeTemplate(tmpl, data, "", "# ", "")
 	case ".el", ".lisp":
-		lic, err = prefix(tmpl, data, "", ";; ", "")
+		lic, err = executeTemplate(tmpl, data, "", ";; ", "")
 	case ".erl":
-		lic, err = prefix(tmpl, data, "", "% ", "")
+		lic, err = executeTemplate(tmpl, data, "", "% ", "")
 	case ".hs", ".sql", ".sdl":
-		lic, err = prefix(tmpl, data, "", "-- ", "")
+		lic, err = executeTemplate(tmpl, data, "", "-- ", "")
 	case ".html", ".xml", ".vue":
-		lic, err = prefix(tmpl, data, "<!--", " ", "-->")
+		lic, err = executeTemplate(tmpl, data, "<!--", " ", "-->")
 	case ".php":
-		lic, err = prefix(tmpl, data, "", "// ", "")
+		lic, err = executeTemplate(tmpl, data, "", "// ", "")
 	case ".ml", ".mli", ".mll", ".mly":
-		lic, err = prefix(tmpl, data, "(**", "   ", "*)")
+		lic, err = executeTemplate(tmpl, data, "(**", "   ", "*)")
 	}
 	return lic, err
 }
@@ -308,5 +331,6 @@ func hasLicense(b []byte) bool {
 		n = len(b)
 	}
 	return bytes.Contains(bytes.ToLower(b[:n]), []byte("copyright")) ||
-		bytes.Contains(bytes.ToLower(b[:n]), []byte("mozilla public"))
+		bytes.Contains(bytes.ToLower(b[:n]), []byte("mozilla public")) ||
+		bytes.Contains(bytes.ToLower(b[:n]), []byte("SPDX-License-Identifier"))
 }
