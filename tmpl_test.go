@@ -62,7 +62,7 @@ func TestFetchTemplate(t *testing.T) {
 			"",
 			spdxOff,
 			"",
-			errors.New(`unknown license: "unknown". Include the '-s' flag to request SPDX style headers using this license.`),
+			errors.New(`unknown license: "unknown". Include the '-s' flag to request SPDX style headers using this license`),
 		},
 
 		// pre-defined license templates, no SPDX
