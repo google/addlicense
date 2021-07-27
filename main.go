@@ -49,6 +49,7 @@ Flags:
 
 var (
 	skipExtensionFlags skipExtensionFlag
+	spdx               spdxFlag
 
 	holder    = flag.String("c", "Google LLC", "copyright holder")
 	license   = flag.String("l", "apache", "license type: apache, bsd, mit, mpl")
@@ -64,6 +65,7 @@ func init() {
 		flag.PrintDefaults()
 	}
 	flag.Var(&skipExtensionFlags, "skip", "To skip files to check/add the header file, for example: -skip rb -skip go")
+	flag.Var(&spdx, "s", "Include SPDX identifier in license header. Set -s=only to only include SPDX identifier.")
 }
 
 type skipExtensionFlag []string
@@ -77,6 +79,29 @@ func (i *skipExtensionFlag) Set(value string) error {
 	return nil
 }
 
+// spdxFlag defines the line flag behavior for specifying SPDX support.
+type spdxFlag string
+
+const (
+	spdxOff  spdxFlag = ""
+	spdxOn   spdxFlag = "true" // value set by flag package on bool flag
+	spdxOnly spdxFlag = "only"
+)
+
+// IsBoolFlag causes a bare '-s' flag to be set as the string 'true'.  This
+// allows the use of the bare '-s' or setting a string '-s=only'.
+func (i *spdxFlag) IsBoolFlag() bool { return true }
+func (i *spdxFlag) String() string   { return string(*i) }
+
+func (i *spdxFlag) Set(value string) error {
+	v := spdxFlag(value)
+	if v != spdxOn && v != spdxOnly {
+		return fmt.Errorf("error: flag 's' expects '%v' or '%v'", spdxOn, spdxOnly)
+	}
+	*i = v
+	return nil
+}
+
 func main() {
 	flag.Parse()
 	if flag.NArg() == 0 {
@@ -84,12 +109,18 @@ func main() {
 		os.Exit(1)
 	}
 
+	// map legacy license values
+	if t, ok := legacyLicenseTypes[*license]; ok {
+		*license = t
+	}
+
 	data := licenseData{
 		Year:   *year,
 		Holder: *holder,
+		SPDXID: *license,
 	}
 
-	tpl, err := fetchTemplate(*license, *licensef)
+	tpl, err := fetchTemplate(*license, *licensef, spdx)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -300,5 +331,6 @@ func hasLicense(b []byte) bool {
 		n = len(b)
 	}
 	return bytes.Contains(bytes.ToLower(b[:n]), []byte("copyright")) ||
-		bytes.Contains(bytes.ToLower(b[:n]), []byte("mozilla public"))
+		bytes.Contains(bytes.ToLower(b[:n]), []byte("mozilla public")) ||
+		bytes.Contains(bytes.ToLower(b[:n]), []byte("SPDX-License-Identifier"))
 }

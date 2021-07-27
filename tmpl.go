@@ -25,25 +25,36 @@ import (
 )
 
 var licenseTemplate = map[string]string{
-	"apache": tmplApache,
-	"mit":    tmplMIT,
-	"bsd":    tmplBSD,
-	"mpl":    tmplMPL,
+	"Apache-2.0": tmplApache,
+	"MIT":        tmplMIT,
+	"bsd":        tmplBSD,
+	"MPL-2.0":    tmplMPL,
+}
+
+// maintain backwards compatibility by mapping legacy license types to their
+// SPDX equivalents.
+var legacyLicenseTypes = map[string]string{
+	"apache": "Apache-2.0",
+	"mit":    "MIT",
+	"mpl":    "MPL-2.0",
 }
 
 // licenseData specifies the data used to fill out a license template.
 type licenseData struct {
 	Year   string // Copyright year(s).
 	Holder string // Name of the copyright holder.
+	SPDXID string // SPDX Identifier
 }
 
 // fetchTemplate returns the license template for the specified license and
 // optional templateFile. If templateFile is provided, the license is read
 // from the specified file. Otherwise, a template is loaded for the specified
 // license, if recognized.
-func fetchTemplate(license string, templateFile string) (string, error) {
+func fetchTemplate(license string, templateFile string, spdx spdxFlag) (string, error) {
 	var t string
-	if templateFile != "" {
+	if spdx == spdxOnly {
+		t = tmplSPDX
+	} else if templateFile != "" {
 		d, err := ioutil.ReadFile(templateFile)
 		if err != nil {
 			return "", fmt.Errorf("license file: %w", err)
@@ -53,7 +64,15 @@ func fetchTemplate(license string, templateFile string) (string, error) {
 	} else {
 		t = licenseTemplate[license]
 		if t == "" {
-			return "", fmt.Errorf("unknown license: %q", license)
+			if spdx == spdxOn {
+				// unknown license, but SPDX headers requested
+				t = tmplSPDX
+			} else {
+				return "", fmt.Errorf("unknown license: %q. Include the '-s' flag to request SPDX style headers using this license.", license)
+			}
+		} else if spdx == spdxOn {
+			// append spdx headers to recognized license
+			t = t + spdxSuffix
 		}
 	}
 
@@ -122,3 +141,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.`
 const tmplMPL = `This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at https://mozilla.org/MPL/2.0/.`
+
+const tmplSPDX = `{{ if and .Year .Holder }}Copyright {{.Year}} {{.Holder}}
+{{ end }}SPDX-License-Identifier: {{.SPDXID}}`
+
+const spdxSuffix = "\n\nSPDX-License-Identifier: {{.SPDXID}}"

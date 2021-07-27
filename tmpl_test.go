@@ -31,16 +31,19 @@ func init() {
 
 func TestFetchTemplate(t *testing.T) {
 	tests := []struct {
-		description  string // test case description
-		license      string // license passed to fetchTemplate
-		templateFile string // templatefile passed to fetchTemplate
-		wantTemplate string // expected returned template
-		wantErr      error  // expected returned error
+		description  string   // test case description
+		license      string   // license passed to fetchTemplate
+		templateFile string   // templatefile passed to fetchTemplate
+		spdx         spdxFlag // spdx value passed to fetchTemplate
+		wantTemplate string   // expected returned template
+		wantErr      error    // expected returned error
 	}{
+		// custom template files
 		{
 			"non-existant template file",
 			"",
 			"/does/not/exist",
+			spdxOff,
 			"",
 			os.ErrNotExist,
 		},
@@ -48,27 +51,34 @@ func TestFetchTemplate(t *testing.T) {
 			"custom template file",
 			"",
 			"testdata/custom.tpl",
+			spdxOff,
 			"Copyright {{.Year}} {{.Holder}}\n\nCustom License Template\n",
 			nil,
 		},
+
 		{
 			"unknown license",
 			"unknown",
 			"",
+			spdxOff,
 			"",
-			errors.New(`unknown license: "unknown"`),
+			errors.New(`unknown license: "unknown". Include the '-s' flag to request SPDX style headers using this license.`),
 		},
+
+		// pre-defined license templates, no SPDX
 		{
 			"apache license template",
-			"apache",
+			"Apache-2.0",
 			"",
+			spdxOff,
 			tmplApache,
 			nil,
 		},
 		{
 			"mit license template",
-			"mit",
+			"MIT",
 			"",
+			spdxOff,
 			tmplMIT,
 			nil,
 		},
@@ -76,21 +86,49 @@ func TestFetchTemplate(t *testing.T) {
 			"bsd license template",
 			"bsd",
 			"",
+			spdxOff,
 			tmplBSD,
 			nil,
 		},
 		{
 			"mpl license template",
-			"mpl",
+			"MPL-2.0",
 			"",
+			spdxOff,
 			tmplMPL,
+			nil,
+		},
+
+		// SPDX variants
+		{
+			"apache license template with SPDX added",
+			"Apache-2.0",
+			"",
+			spdxOn,
+			tmplApache + spdxSuffix,
+			nil,
+		},
+		{
+			"apache license template with SPDX only",
+			"Apache-2.0",
+			"",
+			spdxOnly,
+			tmplSPDX,
+			nil,
+		},
+		{
+			"unknown license with SPDX only",
+			"unknown",
+			"",
+			spdxOnly,
+			tmplSPDX,
 			nil,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			tpl, err := fetchTemplate(tt.license, tt.templateFile)
+			tpl, err := fetchTemplate(tt.license, tt.templateFile, tt.spdx)
 			if tt.wantErr != nil && (err == nil || (!errors.Is(err, tt.wantErr) && err.Error() != tt.wantErr.Error())) {
 				t.Fatalf("fetchTemplate(%q, %q) returned error: %#v, want %#v", tt.license, tt.templateFile, err, tt.wantErr)
 			}
