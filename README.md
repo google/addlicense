@@ -19,9 +19,13 @@ to any file that already has one.
     -l license type: apache, bsd, mit, mpl (defaults to "apache")
     -y year (defaults to current year)
     -check check only mode: verify presence of license headers and exit with non-zero code if missing
+    -ignore file patterns to ignore, for example: -ignore **/*.go -ignore vendor/**
 
 The pattern argument can be provided multiple times, and may also refer
 to single files.
+
+The `-ignore` flag can use any pattern [supported by
+doublestar](https://github.com/bmatcuk/doublestar#patterns).
 
 ## Running in a Docker Container
 

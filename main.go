@@ -30,6 +30,7 @@ import (
 	"text/template"
 	"time"
 
+	doublestar "github.com/bmatcuk/doublestar/v4"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -48,7 +49,8 @@ Flags:
 `
 
 var (
-	skipExtensionFlags skipExtensionFlag
+	skipExtensionFlags stringSlice
+	ignorePatterns     stringSlice
 	spdx               spdxFlag
 
 	holder    = flag.String("c", "Google LLC", "copyright holder")
@@ -64,17 +66,19 @@ func init() {
 		fmt.Fprintln(os.Stderr, helpText)
 		flag.PrintDefaults()
 	}
-	flag.Var(&skipExtensionFlags, "skip", "To skip files to check/add the header file, for example: -skip rb -skip go")
+	flag.Var(&skipExtensionFlags, "skip", "[deprecated: see -ignore] file extensions to skip, for example: -skip rb -skip go")
+	flag.Var(&ignorePatterns, "ignore", "file patterns to ignore, for example: -ignore **/*.go -ignore vendor/**")
 	flag.Var(&spdx, "s", "Include SPDX identifier in license header. Set -s=only to only include SPDX identifier.")
 }
 
-type skipExtensionFlag []string
+// stringSlice stores the results of a repeated command line flag as a string slice.
+type stringSlice []string
 
-func (i *skipExtensionFlag) String() string {
+func (i *stringSlice) String() string {
 	return fmt.Sprint(*i)
 }
 
-func (i *skipExtensionFlag) Set(value string) error {
+func (i *stringSlice) Set(value string) error {
 	*i = append(*i, value)
 	return nil
 }
@@ -107,6 +111,17 @@ func main() {
 	if flag.NArg() == 0 {
 		flag.Usage()
 		os.Exit(1)
+	}
+
+	// convert -skip flags to -ignore equivalents
+	for _, s := range skipExtensionFlags {
+		ignorePatterns = append(ignorePatterns, fmt.Sprintf("**/*.%s", s))
+	}
+	// verify that all ignorePatterns are valid
+	for _, p := range ignorePatterns {
+		if !doublestar.ValidatePattern(p) {
+			log.Fatalf("-ignore pattern %q is not valid", p)
+		}
 	}
 
 	// map legacy license values
@@ -200,15 +215,25 @@ func walk(ch chan<- *file, start string) error {
 		if fi.IsDir() {
 			return nil
 		}
-		for _, skip := range skipExtensionFlags {
-			if strings.TrimPrefix(filepath.Ext(fi.Name()), ".") == skip || fi.Name() == skip {
-				log.Printf("%s: skipping this file", fi.Name())
-				return nil
-			}
+		if fileMatches(path, ignorePatterns) {
+			log.Printf("skipping: %s", path)
+			return nil
 		}
 		ch <- &file{path, fi.Mode()}
 		return nil
 	})
+}
+
+// fileMatches determines if path matches one of the provided file patterns.
+// Patterns are assumed to be valid.
+func fileMatches(path string, patterns []string) bool {
+	for _, p := range patterns {
+		// ignore error, since we assume patterns are valid
+		if match, _ := doublestar.Match(p, path); match {
+			return true
+		}
+	}
+	return false
 }
 
 // addLicense add a license to the file if missing.
