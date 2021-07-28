@@ -395,3 +395,63 @@ func TestHasLicense(t *testing.T) {
 		}
 	}
 }
+
+func TestFileMatches(t *testing.T) {
+	tests := []struct {
+		pattern   string
+		path      string
+		wantMatch bool
+	}{
+		// basic single directory patterns
+		{"", "file.c", false},
+		{"*.c", "file.h", false},
+		{"*.c", "file.c", true},
+
+		// subdirectory patterns
+		{"*.c", "vendor/file.c", false},
+		{"**/*.c", "vendor/file.c", true},
+		{"vendor/**", "vendor/file.c", true},
+		{"vendor/**/*.c", "vendor/file.c", true},
+		{"vendor/**/*.c", "vendor/a/b/file.c", true},
+
+		// single character "?" match
+		{"*.?", "file.c", true},
+		{"*.?", "file.go", false},
+		{"*.??", "file.c", false},
+		{"*.??", "file.go", true},
+
+		// character classes - sets and ranges
+		{"*.[ch]", "file.c", true},
+		{"*.[ch]", "file.h", true},
+		{"*.[ch]", "file.ch", false},
+		{"*.[a-z]", "file.c", true},
+		{"*.[a-z]", "file.h", true},
+		{"*.[a-z]", "file.go", false},
+		{"*.[a-z]", "file.R", false},
+
+		// character classes - negations
+		{"*.[^ch]", "file.c", false},
+		{"*.[^ch]", "file.h", false},
+		{"*.[^ch]", "file.R", true},
+		{"*.[!ch]", "file.c", false},
+		{"*.[!ch]", "file.h", false},
+		{"*.[!ch]", "file.R", true},
+
+		// comma-separated alternative matches
+		{"*.{c,go}", "file.c", true},
+		{"*.{c,go}", "file.go", true},
+		{"*.{c,go}", "file.h", false},
+
+		// negating alternative matches
+		{"*.[^{c,go}]", "file.c", false},
+		{"*.[^{c,go}]", "file.go", false},
+		{"*.[^{c,go}]", "file.h", true},
+	}
+
+	for _, tt := range tests {
+		patterns := []string{tt.pattern}
+		if got := fileMatches(tt.path, patterns); got != tt.wantMatch {
+			t.Errorf("fileMatches(%q, %q) returned %v, want %v", tt.path, patterns, got, tt.wantMatch)
+		}
+	}
+}
