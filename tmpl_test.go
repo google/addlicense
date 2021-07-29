@@ -138,3 +138,51 @@ func TestFetchTemplate(t *testing.T) {
 		})
 	}
 }
+
+func TestExecuteTemplate(t *testing.T) {
+	tests := []struct {
+		template      string
+		data          licenseData
+		top, mid, bot string
+		want          string
+	}{
+		{
+			"",
+			licenseData{},
+			"", "", "",
+			"\n",
+		},
+		{
+			"{{.Holder}}{{.Year}}{{.SPDXID}}",
+			licenseData{Holder: "H", Year: "Y", SPDXID: "S"},
+			"", "", "",
+			"HYS\n\n",
+		},
+		{
+			"{{.Holder}}{{.Year}}{{.SPDXID}}",
+			licenseData{Holder: "H", Year: "Y", SPDXID: "S"},
+			"", "// ", "",
+			"// HYS\n\n",
+		},
+		{
+			"{{.Holder}}{{.Year}}{{.SPDXID}}",
+			licenseData{Holder: "H", Year: "Y", SPDXID: "S"},
+			"/*", " * ", "*/",
+			"/*\n * HYS\n*/\n\n",
+		},
+	}
+
+	for _, tt := range tests {
+		tpl, err := template.New("").Parse(tt.template)
+		if err != nil {
+			t.Errorf("error parsing template: %v", err)
+		}
+		got, err := executeTemplate(tpl, tt.data, tt.top, tt.mid, tt.bot)
+		if err != nil {
+			t.Errorf("executeTemplate(%q, %v, %q, %q, %q) returned error: %v", tt.template, tt.data, tt.top, tt.mid, tt.bot, err)
+		}
+		if string(got) != tt.want {
+			t.Errorf("executeTemplate(%q, %v, %q, %q, %q) returned %q, want: %q", tt.template, tt.data, tt.top, tt.mid, tt.bot, string(got), tt.want)
+		}
+	}
+}
