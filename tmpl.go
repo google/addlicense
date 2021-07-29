@@ -18,9 +18,9 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"html/template"
 	"io/ioutil"
 	"strings"
+	"text/template"
 	"unicode"
 )
 

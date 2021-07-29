@@ -15,13 +15,13 @@
 package main
 
 import (
-	"html/template"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
+	"text/template"
 )
 
 func run(t *testing.T, name string, args ...string) {

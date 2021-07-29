@@ -16,9 +16,9 @@ package main
 
 import (
 	"errors"
-	"html/template"
 	"os"
 	"testing"
+	"text/template"
 )
 
 func init() {
@@ -169,6 +169,14 @@ func TestExecuteTemplate(t *testing.T) {
 			licenseData{Holder: "H", Year: "Y", SPDXID: "S"},
 			"/*", " * ", "*/",
 			"/*\n * HYS\n*/\n\n",
+		},
+
+		// ensure we don't escape HTML characters by using the wrong template package
+		{
+			"{{.Holder}}",
+			licenseData{Holder: "A&Z"},
+			"", "", "",
+			"A&Z\n\n",
 		},
 	}
 
