@@ -38,7 +38,7 @@ docker run -it google/addlicense -h
 
 - Usage example
 ```bash
-docker run -v ${PWD}:/go/src/app/ -it google/addlicense -c "Google LLC" *.go
+docker run -v ${PWD}:/src -it google/addlicense -c "Google LLC" *.go
 ```
 
 ## license
