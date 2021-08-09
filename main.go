@@ -296,6 +296,8 @@ var head = []string{
 	"# encoding:",              // Ruby encoding
 	"# frozen_string_literal:", // Ruby interpreter instruction
 	"<?php",                    // PHP opening tag
+	"# escape",                 // Dockerfile directive https://docs.docker.com/engine/reference/builder/#parser-directives
+	"# syntax",                 // Dockerfile directive https://docs.docker.com/engine/reference/builder/#parser-directives
 }
 
 func hashBang(b []byte) []byte {
