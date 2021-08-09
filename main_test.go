@@ -242,6 +242,8 @@ func TestAddLicense(t *testing.T) {
 		{"# encoding: UTF-8\ncontent", "# encoding: UTF-8\n// HYS\n\ncontent", true},
 		{"# frozen_string_literal: true\ncontent", "# frozen_string_literal: true\n// HYS\n\ncontent", true},
 		{"<?php\ncontent", "<?php\n// HYS\n\ncontent", true},
+		{"# escape: `\ncontent", "# escape: `\n// HYS\n\ncontent", true},
+		{"# syntax: docker/dockerfile:1.3\ncontent", "# syntax: docker/dockerfile:1.3\n// HYS\n\ncontent", true},
 
 		// ensure files with existing license or generated files are
 		// skipped. No need to test all permutations of these, since
