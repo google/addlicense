@@ -339,6 +339,16 @@ func TestLicenseHeader(t *testing.T) {
 			[]string{"f.ml", "f.mli", "f.mll", "f.mly"},
 			"(**\n   HYS\n*)\n\n",
 		},
+		{
+			[]string{"cmakelists.txt", "f.cmake", "f.cmake.in"},
+			"# HYS\n\n",
+		},
+
+		// ensure matches are case insenstive
+		{
+			[]string{"F.PY", "DoCkErFiLe"},
+			"# HYS\n\n",
+		},
 	}
 
 	for _, tt := range tests {
