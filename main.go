@@ -306,6 +306,11 @@ func licenseHeader(path string, tmpl *template.Template, data licenseData) ([]by
 		lic, err = executeTemplate(tmpl, data, "", "// ", "")
 	case ".ml", ".mli", ".mll", ".mly":
 		lic, err = executeTemplate(tmpl, data, "(**", "   ", "*)")
+	default:
+		// handle various cmake files
+		if base == "cmakelists.txt" || strings.HasSuffix(base, ".cmake.in") || strings.HasSuffix(base, ".cmake") {
+			lic, err = executeTemplate(tmpl, data, "", "# ", "")
+		}
 	}
 	return lic, err
 }
