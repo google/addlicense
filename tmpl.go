@@ -18,28 +18,70 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"html/template"
+	"io/ioutil"
 	"strings"
+	"text/template"
 	"unicode"
 )
 
-var licenseTemplate = make(map[string]*template.Template)
-
-func init() {
-	licenseTemplate["apache"] = template.Must(template.New("").Parse(tmplApache))
-	licenseTemplate["mit"] = template.Must(template.New("").Parse(tmplMIT))
-	licenseTemplate["bsd"] = template.Must(template.New("").Parse(tmplBSD))
-	licenseTemplate["mpl"] = template.Must(template.New("").Parse(tmplMPL))
+var licenseTemplate = map[string]string{
+	"Apache-2.0": tmplApache,
+	"MIT":        tmplMIT,
+	"bsd":        tmplBSD,
+	"MPL-2.0":    tmplMPL,
 }
 
-type copyrightData struct {
-	Year   string
-	Holder string
+// maintain backwards compatibility by mapping legacy license types to their
+// SPDX equivalents.
+var legacyLicenseTypes = map[string]string{
+	"apache": "Apache-2.0",
+	"mit":    "MIT",
+	"mpl":    "MPL-2.0",
 }
 
-// prefix will execute a license template t with data d
+// licenseData specifies the data used to fill out a license template.
+type licenseData struct {
+	Year   string // Copyright year(s).
+	Holder string // Name of the copyright holder.
+	SPDXID string // SPDX Identifier
+}
+
+// fetchTemplate returns the license template for the specified license and
+// optional templateFile. If templateFile is provided, the license is read
+// from the specified file. Otherwise, a template is loaded for the specified
+// license, if recognized.
+func fetchTemplate(license string, templateFile string, spdx spdxFlag) (string, error) {
+	var t string
+	if spdx == spdxOnly {
+		t = tmplSPDX
+	} else if templateFile != "" {
+		d, err := ioutil.ReadFile(templateFile)
+		if err != nil {
+			return "", fmt.Errorf("license file: %w", err)
+		}
+
+		t = string(d)
+	} else {
+		t = licenseTemplate[license]
+		if t == "" {
+			if spdx == spdxOn {
+				// unknown license, but SPDX headers requested
+				t = tmplSPDX
+			} else {
+				return "", fmt.Errorf("unknown license: %q. Include the '-s' flag to request SPDX style headers using this license", license)
+			}
+		} else if spdx == spdxOn {
+			// append spdx headers to recognized license
+			t = t + spdxSuffix
+		}
+	}
+
+	return t, nil
+}
+
+// executeTemplate will execute a license template t with data d
 // and prefix the result with top, middle and bottom.
-func prefix(t *template.Template, d *copyrightData, top, mid, bot string) ([]byte, error) {
+func executeTemplate(t *template.Template, d licenseData, top, mid, bot string) ([]byte, error) {
 	var buf bytes.Buffer
 	if err := t.Execute(&buf, d); err != nil {
 		return nil, err
@@ -99,3 +141,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.`
 const tmplMPL = `This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at https://mozilla.org/MPL/2.0/.`
+
+const tmplSPDX = `{{ if and .Year .Holder }}Copyright {{.Year}} {{.Holder}}
+{{ end }}SPDX-License-Identifier: {{.SPDXID}}`
+
+const spdxSuffix = "\n\nSPDX-License-Identifier: {{.SPDXID}}"

@@ -6,6 +6,8 @@ by scanning directory patterns recursively.
 It modifies all source files in place and avoids adding a license header
 to any file that already has one.
 
+addlicense requires go 1.16 or later.
+
 ## install
 
     go get -u github.com/google/addlicense
@@ -18,12 +20,17 @@ to any file that already has one.
     -f custom license file (no default)
     -l license type: apache, bsd, mit, mpl (default "apache")
     -y year (defaults to current year)
-    -check check only mode: verify presence of license headers and exit with non-zero code if missing    
+    -check check only mode: verify presence of license headers and exit with non-zero code if missing
+    -ignore file patterns to ignore, for example: -ignore **/*.go -ignore vendor/**    
     -u update mode: if the year in the license was older than current one - update it (eg. 2018 changes to 2018-2021)
     -v verbose mode: print the name of the files that are modified
     
+
 The pattern argument can be provided multiple times, and may also refer
 to single files.
+
+The `-ignore` flag can use any pattern [supported by
+doublestar](https://github.com/bmatcuk/doublestar#patterns).
 
 ## Running in a Docker Container
 
@@ -40,7 +47,7 @@ docker run -it google/addlicense -h
 
 - Usage example
 ```bash
-docker run -v ${PWD}:/go/src/app/ -it google/addlicense -c "Google LLC" *.go
+docker run -v ${PWD}:/src -it google/addlicense -c "Google LLC" *.go
 ```
 
 ## license

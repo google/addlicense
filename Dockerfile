@@ -1,10 +1,20 @@
-FROM golang:1-alpine AS build-env
+FROM golang:1.16 AS build
 
-RUN apk add --no-cache --upgrade git openssh-client ca-certificates
-RUN go get -u github.com/golang/dep/cmd/dep
-WORKDIR /go/src/app
+WORKDIR /app
 
-# Install
-RUN go get -u github.com/google/addlicense
+COPY go.mod go.sum ./
+RUN go mod download
 
-ENTRYPOINT ["addlicense"]
+# copy source and build
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build .
+
+
+# make a bare minimal image
+FROM scratch
+
+# source to be scanned should be mounted to /src
+WORKDIR /src
+COPY --from=build /app/addlicense /app/addlicense
+
+ENTRYPOINT ["/app/addlicense"]
