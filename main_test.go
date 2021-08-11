@@ -289,7 +289,7 @@ func TestAddLicense(t *testing.T) {
 		}
 
 		// run addlicense
-		updated, err := addLicense(f.Name(), fi.Mode(), tmpl, data)
+		updated, err := addLicense(f.Name(), false, fi.Mode(), tmpl, data)
 		if err != nil {
 			t.Error(err)
 		}

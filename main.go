@@ -301,7 +301,6 @@ func fileHasLicense(path string) (bool, error) {
 	return hasLicense(b) || isGenerated(b), nil
 }
 
-func licenseHeader(path string, tmpl *template.Template, data licenseData) ([]byte, error) {
 // fileHasOutdatedLicense reports whether the file at path contains a license header with year older than the current one.
 func fileHasOutdatedLicense(path string, currentYear string) (bool, error) {
 	b, err := ioutil.ReadFile(path)
@@ -311,7 +310,7 @@ func fileHasOutdatedLicense(path string, currentYear string) (bool, error) {
 	return hasLicense(b) && isOutdatedLicense(b, currentYear), nil
 }
 
-func licenseHeader(path string, tmpl *template.Template, data *copyrightData) ([]byte, error) {
+func licenseHeader(path string, tmpl *template.Template, data licenseData) ([]byte, error) {
 	var lic []byte
 	var err error
 	switch fileExtension(path) {
