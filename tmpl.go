@@ -101,7 +101,7 @@ const tmplMPL = `This Source Code Form is subject to the terms of the Mozilla Pu
 License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at https://mozilla.org/MPL/2.0/.`
 
-const tmplGNU = `Copyright (c) {{.Year}} {{.Holder}}
+const tmplGPL3+ = `Copyright (c) {{.Year}} {{.Holder}}
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
