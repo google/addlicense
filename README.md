@@ -10,7 +10,7 @@ addlicense requires go 1.16 or later.
 
 ## install
 
-    go get -u github.com/google/addlicense
+    go install github.com/google/addlicense@latest
 
 ## usage
 
