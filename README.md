@@ -15,13 +15,16 @@ addlicense requires go 1.16 or later.
 ## usage
 
     addlicense [flags] pattern [pattern ...]
-
-    -c copyright holder (defaults to "Google LLC")
+   
+    -c copyright holder (default "Google LLC")
     -f custom license file (no default)
-    -l license type: apache, bsd, mit, mpl (defaults to "apache")
+    -l license type: apache, bsd, mit, mpl (default "apache")
     -y year (defaults to current year)
     -check check only mode: verify presence of license headers and exit with non-zero code if missing
-    -ignore file patterns to ignore, for example: -ignore **/*.go -ignore vendor/**
+    -ignore file patterns to ignore, for example: -ignore **/*.go -ignore vendor/**    
+    -u update mode: if the year in the license was older than current one - update it (eg. 2018 changes to 2018-2021)
+    -v verbose mode: print the name of the files that are modified
+    
 
 The pattern argument can be provided multiple times, and may also refer
 to single files.

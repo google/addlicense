@@ -65,6 +65,31 @@ func TestInitial(t *testing.T) {
 	}
 }
 
+func TestUpdate(t *testing.T) {
+	if os.Getenv("RUNME") != "" {
+		main()
+		return
+	}
+
+	tmp := tempDir(t)
+	t.Logf("tmp dir: %s", tmp)
+	run(t, "cp", "-r", "testdata/update/initial", tmp)
+
+	// run at least 2 times to ensure the program is idempotent
+	for i := 0; i < 2; i++ {
+		t.Logf("run #%d", i)
+		targs := []string{"-test.run=TestUpdate"}
+		cargs := []string{"-l", "apache", "-c", "Google LLC", "-y", "2018", "-u", tmp}
+		c := exec.Command(os.Args[0], append(targs, cargs...)...)
+		c.Env = []string{"RUNME=1"}
+		if out, err := c.CombinedOutput(); err != nil {
+			t.Fatalf("%v\n%s", err, out)
+		}
+
+		run(t, "diff", "-r", filepath.Join(tmp, "initial"), "testdata/update/expected")
+	}
+}
+
 func TestMultiyear(t *testing.T) {
 	if os.Getenv("RUNME") != "" {
 		main()
@@ -264,7 +289,7 @@ func TestAddLicense(t *testing.T) {
 		}
 
 		// run addlicense
-		updated, err := addLicense(f.Name(), fi.Mode(), tmpl, data)
+		updated, err := addLicense(f.Name(), false, fi.Mode(), tmpl, data)
 		if err != nil {
 			t.Error(err)
 		}
