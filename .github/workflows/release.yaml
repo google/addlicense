@@ -5,65 +5,48 @@ on:
     tags:
       - '*'
 
+permissions:
+  contents: write
 
 jobs:
   # use goreleaser to cross-compile go binaries and add them to GitHub release
   goreleaser:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    env:
+      DOCKER_CLI_EXPERIMENTAL: "enabled"
+      REGISTYRY: "ghcr.io"
+      IMAGE_NAME: "google/addlicense"
     steps:
-      -
-        name: Checkout
+      - name: Checkout
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      -
-        name: Set up Go
+      - name: Set up Go
         uses: actions/setup-go@v2
         with:
           go-version: 1.16
-      -
-        name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@5a54d7e660bda43b405e8463261b3d25631ffe86 #v2.7.0
+      - uses: docker/setup-qemu-action@27d0a4f181a40b142cce983c5393082c365d1480 # pin@v1.2.0
+      - uses: docker/setup-buildx-action@94ab11c41e45d028884a99163086648e898eed25 # pin@v1.6.0
+      - name: dockerhub-login
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9 # pin@v1.10.0
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: ghcr-login
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9 # pin@v1.10.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run GoReleaser
+        uses:  goreleaser/goreleaser-action@5df302e5e9e4c66310a6b6493a8865b12c555af2 # pin@v2.8.0
         with:
           distribution: goreleaser
           version: latest
           args: release --rm-dist
         env:
+          REGISTRY: ${{ env.REGISTRY }}
+          IMAGE: ${{ env.IMAGE_NAME }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  # build and publish docker image
-  build-and-push-image:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    env:
-      REGISTRY: ghcr.io
-      IMAGE_NAME: ${{ github.repository }}
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Log in to the Container registry
-        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9 #v1.10.0
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@8b842e721d38d18bea23b57f4c040e53331f4ca2 #v3.4.1
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@1bc1040caef9e604eb543693ba89b5bf4fc80935 #v2.6.1
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
