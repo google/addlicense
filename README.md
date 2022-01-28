@@ -20,6 +20,7 @@ addlicense requires go 1.16 or later.
     -f custom license file (no default)
     -l license type: apache, bsd, mit, mpl (defaults to "apache")
     -y year (defaults to current year)
+    -x custom license check, can be used with custom license to properly check presence of header (defaults to "(c)")
     -check check only mode: verify presence of license headers and exit with non-zero code if missing
     -ignore file patterns to ignore, for example: -ignore **/*.go -ignore vendor/**
 

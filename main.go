@@ -57,6 +57,7 @@ var (
 	license   = flag.String("l", "apache", "license type: apache, bsd, mit, mpl")
 	licensef  = flag.String("f", "", "license file")
 	year      = flag.String("y", fmt.Sprint(time.Now().Year()), "copyright year(s)")
+	copyright = flag.String("x", "(c)", "custom copyright string used to determine license header presence")
 	verbose   = flag.Bool("v", false, "verbose mode: print the name of the files that are modified")
 	checkonly = flag.Bool("check", false, "check only mode: verify presence of license headers and exit with non-zero code if missing")
 )
@@ -371,5 +372,6 @@ func hasLicense(b []byte) bool {
 	}
 	return bytes.Contains(bytes.ToLower(b[:n]), []byte("copyright")) ||
 		bytes.Contains(bytes.ToLower(b[:n]), []byte("mozilla public")) ||
-		bytes.Contains(bytes.ToLower(b[:n]), []byte("spdx-license-identifier"))
+		bytes.Contains(bytes.ToLower(b[:n]), []byte("spdx-license-identifier")) ||
+		bytes.Contains(bytes.ToLower(b[:n]), []byte(*copyright))
 }
