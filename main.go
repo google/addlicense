@@ -46,6 +46,7 @@ The pattern argument can be provided multiple times, and may also refer
 to single files.
 
 Flags:
+
 `
 
 var (
@@ -63,7 +64,7 @@ var (
 
 func init() {
 	flag.Usage = func() {
-		fmt.Fprintln(os.Stderr, helpText)
+		fmt.Fprint(os.Stderr, helpText)
 		flag.PrintDefaults()
 	}
 	flag.Var(&skipExtensionFlags, "skip", "[deprecated: see -ignore] file extensions to skip, for example: -skip rb -skip go")
