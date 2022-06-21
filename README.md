@@ -16,12 +16,14 @@ addlicense requires go 1.16 or later.
 
     addlicense [flags] pattern [pattern ...]
 
-    -c copyright holder (defaults to "Google LLC")
-    -f custom license file (no default)
-    -l license type: apache, bsd, mit, mpl (defaults to "apache")
-    -y year (defaults to current year)
-    -check check only mode: verify presence of license headers and exit with non-zero code if missing
+    -c      copyright holder (default "Google LLC")
+    -check  check only mode: verify presence of license headers and exit with non-zero code if missing
+    -f      license file
     -ignore file patterns to ignore, for example: -ignore **/*.go -ignore vendor/**
+    -l      license type: apache, bsd, mit, mpl (default "apache")
+    -s      Include SPDX identifier in license header. Set -s=only to only include SPDX identifier.
+    -v      verbose mode: print the name of the files that are modified
+    -y      copyright year(s) (default "2022")
 
 The pattern argument can be provided multiple times, and may also refer
 to single files.  Directories are processed recursively.
