@@ -54,7 +54,7 @@ Finally, to run it, mount the directory you want to scan to `/src` and pass the
 appropriate addlicense flags:
 
 ```bash
-docker run -it ghcr.io/google/addlicense -v ${PWD}:/src -c "Google LLC" *.go
+docker run -it -v ${PWD}:/src ghcr.io/google/addlicense -c "Google LLC" *.go
 ```
 
 ## license
