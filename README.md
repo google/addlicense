@@ -24,7 +24,12 @@ addlicense requires go 1.16 or later.
     -ignore file patterns to ignore, for example: -ignore **/*.go -ignore vendor/**
 
 The pattern argument can be provided multiple times, and may also refer
-to single files.
+to single files.  Directories are processed recursively.
+
+For example, to run addlicense across everything in the current directory and
+all subdirectories:
+
+    addlicense .
 
 The `-ignore` flag can use any pattern [supported by
 doublestar](https://github.com/bmatcuk/doublestar#patterns).
