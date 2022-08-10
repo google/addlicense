@@ -114,6 +114,38 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Get non-flag command-line args
+	patterns := flag.Args()
+
+	// real main
+	Run(
+		skipExtensionFlags,
+		ignorePatterns,
+		spdx,
+		*holder,
+		*license,
+		*licensef,
+		*year,
+		*verbose,
+		*checkonly,
+		patterns,
+	)
+}
+
+// Run executes addLicense with supplied variables
+func Run(
+	skipExtensionFlags stringSlice,
+	ignorePatterns stringSlice,
+	spdx spdxFlag,
+	holder string,
+	license string,
+	licensef string,
+	year string,
+	verbose bool,
+	checkonly bool,
+	patterns []string,
+) {
+
 	// convert -skip flags to -ignore equivalents
 	for _, s := range skipExtensionFlags {
 		ignorePatterns = append(ignorePatterns, fmt.Sprintf("**/*.%s", s))
@@ -126,17 +158,17 @@ func main() {
 	}
 
 	// map legacy license values
-	if t, ok := legacyLicenseTypes[*license]; ok {
-		*license = t
+	if t, ok := legacyLicenseTypes[license]; ok {
+		license = t
 	}
 
 	data := licenseData{
-		Year:   *year,
-		Holder: *holder,
-		SPDXID: *license,
+		Year:   year,
+		Holder: holder,
+		SPDXID: license,
 	}
 
-	tpl, err := fetchTemplate(*license, *licensef, spdx)
+	tpl, err := fetchTemplate(license, licensef, spdx)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -153,7 +185,7 @@ func main() {
 		for f := range ch {
 			f := f // https://golang.org/doc/faq#closures_and_goroutines
 			wg.Go(func() error {
-				if *checkonly {
+				if checkonly {
 					// Check if file extension is known
 					lic, err := licenseHeader(f.path, t, data)
 					if err != nil {
@@ -179,7 +211,7 @@ func main() {
 						log.Printf("%s: %v", f.path, err)
 						return err
 					}
-					if *verbose && modified {
+					if verbose && modified {
 						log.Printf("%s modified", f.path)
 					}
 				}
@@ -193,7 +225,7 @@ func main() {
 		}
 	}()
 
-	for _, d := range flag.Args() {
+	for _, d := range patterns {
 		if err := walk(ch, d); err != nil {
 			log.Fatal(err)
 		}
