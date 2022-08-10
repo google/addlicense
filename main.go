@@ -122,6 +122,9 @@ func main() {
 		ignorePatterns = append(ignorePatterns, fmt.Sprintf("**/*.%s", s))
 	}
 
+	// create logger to print updates to stdout
+	logger := log.Default()
+
 	// real main
 	err := Run(
 		ignorePatterns,
@@ -133,6 +136,7 @@ func main() {
 		*verbose,
 		*checkonly,
 		patterns,
+		logger,
 	)
 
 	if err != nil {
@@ -151,6 +155,7 @@ func Run(
 	verbose bool,
 	checkonly bool,
 	patterns []string,
+	logger *log.Logger,
 ) error {
 
 	// verify that all ignorePatterns are valid
@@ -192,7 +197,7 @@ func Run(
 					// Check if file extension is known
 					lic, err := licenseHeader(f.path, t, data)
 					if err != nil {
-						log.Printf("%s: %v", f.path, err)
+						logger.Printf("%s: %v", f.path, err)
 						return err
 					}
 					if lic == nil { // Unknown fileExtension
@@ -201,21 +206,21 @@ func Run(
 					// Check if file has a license
 					hasLicense, err := fileHasLicense(f.path)
 					if err != nil {
-						log.Printf("%s: %v", f.path, err)
+						logger.Printf("%s: %v", f.path, err)
 						return err
 					}
 					if !hasLicense {
-						fmt.Printf("%s\n", f.path)
+						logger.Printf("%s\n", f.path)
 						return errors.New("missing license header")
 					}
 				} else {
 					modified, err := addLicense(f.path, f.mode, t, data)
 					if err != nil {
-						log.Printf("%s: %v", f.path, err)
+						logger.Printf("%s: %v", f.path, err)
 						return err
 					}
 					if verbose && modified {
-						log.Printf("%s modified", f.path)
+						logger.Printf("%s modified", f.path)
 					}
 				}
 				return nil
@@ -229,7 +234,7 @@ func Run(
 	}()
 
 	for _, d := range patterns {
-		if err := walk(ch, d); err != nil {
+		if err := walk(ch, d, logger); err != nil {
 			return err
 		}
 	}
@@ -244,17 +249,17 @@ type file struct {
 	mode os.FileMode
 }
 
-func walk(ch chan<- *file, start string) error {
+func walk(ch chan<- *file, start string, logger *log.Logger) error {
 	return filepath.Walk(start, func(path string, fi os.FileInfo, err error) error {
 		if err != nil {
-			log.Printf("%s error: %v", path, err)
+			logger.Printf("%s error: %v", path, err)
 			return nil
 		}
 		if fi.IsDir() {
 			return nil
 		}
 		if fileMatches(path, ignorePatterns) {
-			log.Printf("skipping: %s", path)
+			logger.Printf("skipping: %s", path)
 			return nil
 		}
 		ch <- &file{path, fi.Mode()}
