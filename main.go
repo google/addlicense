@@ -123,7 +123,7 @@ func main() {
 	}
 
 	// real main
-	Run(
+	err := Run(
 		ignorePatterns,
 		spdx,
 		*holder,
@@ -134,6 +134,10 @@ func main() {
 		*checkonly,
 		patterns,
 	)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 // Run executes addLicense with supplied variables
@@ -147,12 +151,12 @@ func Run(
 	verbose bool,
 	checkonly bool,
 	patterns []string,
-) {
+) error {
 
 	// verify that all ignorePatterns are valid
 	for _, p := range ignorePatterns {
 		if !doublestar.ValidatePattern(p) {
-			log.Fatalf("-ignore pattern %q is not valid", p)
+			return fmt.Errorf("-ignore pattern %q is not valid", p)
 		}
 	}
 
@@ -169,11 +173,11 @@ func Run(
 
 	tpl, err := fetchTemplate(license, licensef, spdx)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	t, err := template.New("").Parse(tpl)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	// process at most 1000 files in parallel
@@ -226,11 +230,13 @@ func Run(
 
 	for _, d := range patterns {
 		if err := walk(ch, d); err != nil {
-			log.Fatal(err)
+			return err
 		}
 	}
 	close(ch)
 	<-done
+
+	return nil
 }
 
 type file struct {
