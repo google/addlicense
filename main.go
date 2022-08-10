@@ -117,9 +117,13 @@ func main() {
 	// Get non-flag command-line args
 	patterns := flag.Args()
 
+	// convert -skip flags to -ignore equivalents
+	for _, s := range skipExtensionFlags {
+		ignorePatterns = append(ignorePatterns, fmt.Sprintf("**/*.%s", s))
+	}
+
 	// real main
 	Run(
-		skipExtensionFlags,
 		ignorePatterns,
 		spdx,
 		*holder,
@@ -134,7 +138,6 @@ func main() {
 
 // Run executes addLicense with supplied variables
 func Run(
-	skipExtensionFlags stringSlice,
 	ignorePatterns stringSlice,
 	spdx spdxFlag,
 	holder string,
@@ -146,10 +149,6 @@ func Run(
 	patterns []string,
 ) {
 
-	// convert -skip flags to -ignore equivalents
-	for _, s := range skipExtensionFlags {
-		ignorePatterns = append(ignorePatterns, fmt.Sprintf("**/*.%s", s))
-	}
 	// verify that all ignorePatterns are valid
 	for _, p := range ignorePatterns {
 		if !doublestar.ValidatePattern(p) {
