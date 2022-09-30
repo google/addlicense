@@ -23,6 +23,24 @@ to any file that already has one.
 The pattern argument can be provided multiple times, and may also refer
 to single files.
 
+## Running in a Docker Container
+
+- Clone the repository using `git clone https://github.com/google/addlicense.git`
+- Build your docker container
+```bash
+docker build -t google/addlicense .
+```
+
+- Test the image
+```bash
+docker run -it google/addlicense -h
+```
+
+- Usage example
+```bash
+docker run -v ${PWD}:/go/src/app/ -it google/addlicense -c "Google LLC" *.go
+```
+
 ## license
 
 Apache 2.0
