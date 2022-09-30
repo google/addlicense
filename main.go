@@ -57,7 +57,7 @@ var (
 
 func main() {
 	flag.Usage = func() {
-		fmt.Fprintln(os.Stderr, helpText)
+		// fmt.Fprintln(os.Stderr, helpText)
 		flag.PrintDefaults()
 	}
 	flag.Parse()
@@ -209,7 +209,7 @@ func licenseHeader(path string, tmpl *template.Template, data *copyrightData) ([
 		lic, err = prefix(tmpl, data, "/*", " * ", " */")
 	case ".js", ".mjs", ".cjs", ".jsx", ".tsx", ".css", ".scss", ".sass", ".tf", ".ts":
 		lic, err = prefix(tmpl, data, "/**", " * ", " */")
-	case ".cc", ".cpp", ".cs", ".go", ".hh", ".hpp", ".java", ".m", ".mm", ".proto", ".rs", ".scala", ".swift", ".dart", ".groovy", ".kt", ".kts":
+	case ".cc", ".cpp", ".cs", ".go", ".hh", ".hpp", ".java", ".m", ".mm", ".proto", ".rs", ".scala", ".swift", ".dart", ".groovy", ".kt", ".kts", ".cfc":
 		lic, err = prefix(tmpl, data, "", "// ", "")
 	case ".py", ".sh", ".yaml", ".yml", ".dockerfile", "dockerfile", ".rb", "gemfile", "makefile":
 		lic, err = prefix(tmpl, data, "", "# ", "")
@@ -219,7 +219,7 @@ func licenseHeader(path string, tmpl *template.Template, data *copyrightData) ([
 		lic, err = prefix(tmpl, data, "", "% ", "")
 	case ".hs", ".sql":
 		lic, err = prefix(tmpl, data, "", "-- ", "")
-	case ".html", ".xml", ".vue":
+	case ".html", ".xml", ".vue", ".cfml", ".cfm":
 		lic, err = prefix(tmpl, data, "<!--", " ", "-->")
 	case ".php":
 		lic, err = prefix(tmpl, data, "", "// ", "")
