@@ -295,7 +295,7 @@ func licenseHeader(path string, tmpl *template.Template, data licenseData) ([]by
 		lic, err = executeTemplate(tmpl, data, "/**", " * ", " */")
 	case ".cc", ".cpp", ".cs", ".go", ".hcl", ".hh", ".hpp", ".m", ".mm", ".proto", ".rs", ".swift", ".dart", ".groovy", ".v", ".sv":
 		lic, err = executeTemplate(tmpl, data, "", "// ", "")
-	case ".py", ".sh", ".yaml", ".yml", ".dockerfile", "dockerfile", ".rb", "gemfile", ".tcl", ".bzl", ".pl", ".pp", "build":
+	case ".py", ".sh", ".yaml", ".yml", ".dockerfile", "dockerfile", ".rb", "gemfile", ".tcl", ".bzl", ".pl", ".pp", "build", ".awk", ".ex", ".exs", ".jl", ".raku":
 		lic, err = executeTemplate(tmpl, data, "", "# ", "")
 	case ".el", ".lisp":
 		lic, err = executeTemplate(tmpl, data, "", ";; ", "")
@@ -309,6 +309,8 @@ func licenseHeader(path string, tmpl *template.Template, data licenseData) ([]by
 		lic, err = executeTemplate(tmpl, data, "", "// ", "")
 	case ".ml", ".mli", ".mll", ".mly":
 		lic, err = executeTemplate(tmpl, data, "(**", "   ", "*)")
+	case ".vim":
+		lic, err = executeTemplate(tmpl, data, "", `" `, "")
 	default:
 		// handle various cmake files
 		if base == "cmakelists.txt" || strings.HasSuffix(base, ".cmake.in") || strings.HasSuffix(base, ".cmake") {
