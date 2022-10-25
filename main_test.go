@@ -316,7 +316,7 @@ func TestLicenseHeader(t *testing.T) {
 			"// HYS\n\n",
 		},
 		{
-			[]string{"f.py", "f.sh", "f.yaml", "f.yml", "f.dockerfile", "dockerfile", "f.rb", "gemfile", "f.tcl", "f.bzl", "f.pl", "f.pp", "build"},
+			[]string{"f.py", "f.sh", "f.yaml", "f.yml", "f.dockerfile", "dockerfile", "f.rb", "gemfile", "f.tcl", "f.bzl", "f.pl", "f.pp", "build", "f.awk", "f.ex", "f.exs", "f.jl", "f.raku"},
 			"# HYS\n\n",
 		},
 		{
@@ -338,6 +338,10 @@ func TestLicenseHeader(t *testing.T) {
 		{
 			[]string{"f.ml", "f.mli", "f.mll", "f.mly"},
 			"(**\n   HYS\n*)\n\n",
+		},
+		{
+			[]string{"f.vim"},
+			"\" HYS\n\n",
 		},
 		{
 			[]string{"cmakelists.txt", "f.cmake", "f.cmake.in"},
