@@ -214,7 +214,7 @@ func createTempFile(contents string, pattern string) (*os.File, error) {
 		return nil, err
 	}
 
-	if err := ioutil.WriteFile(f.Name(), []byte(contents), 0644); err != nil {
+	if err := ioutil.WriteFile(f.Name(), []byte(contents), 0o644); err != nil {
 		return nil, err
 	}
 
@@ -307,16 +307,18 @@ func TestLicenseHeader(t *testing.T) {
 			"/*\n * HYS\n */\n\n",
 		},
 		{
-			[]string{"f.js", "f.mjs", "f.cjs", "f.jsx", "f.tsx", "f.css", "f.scss", "f.sass", "f.tf", "f.ts"},
+			[]string{"f.js", "f.mjs", "f.cjs", "f.jsx", "f.tsx", "f.css", "f.scss", "f.sass", "f.ts"},
 			"/**\n * HYS\n */\n\n",
 		},
 		{
-			[]string{"f.cc", "f.cpp", "f.cs", "f.go", "f.hcl", "f.hh", "f.hpp", "f.m", "f.mm", "f.proto",
-				"f.rs", "f.swift", "f.dart", "f.groovy", "f.v", "f.sv", "f.php"},
+			[]string{
+				"f.cc", "f.cpp", "f.cs", "f.go", "f.hcl", "f.hh", "f.hpp", "f.m", "f.mm", "f.proto",
+				"f.rs", "f.swift", "f.dart", "f.groovy", "f.v", "f.sv", "f.php",
+			},
 			"// HYS\n\n",
 		},
 		{
-			[]string{"f.py", "f.sh", "f.yaml", "f.yml", "f.dockerfile", "dockerfile", "f.rb", "gemfile", "f.tcl", "f.bzl", "f.pl", "f.pp", "build"},
+			[]string{"f.py", "f.sh", "f.yaml", "f.yml", "f.dockerfile", "dockerfile", "f.rb", "gemfile", "f.tcl", "f.tf", "f.bzl", "f.pl", "f.pp", "build"},
 			"# HYS\n\n",
 		},
 		{
