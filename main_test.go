@@ -214,7 +214,7 @@ func createTempFile(contents string, pattern string) (*os.File, error) {
 		return nil, err
 	}
 
-	if err := ioutil.WriteFile(f.Name(), []byte(contents), 0o644); err != nil {
+	if err := ioutil.WriteFile(f.Name(), []byte(contents), 0644); err != nil {
 		return nil, err
 	}
 
@@ -311,10 +311,8 @@ func TestLicenseHeader(t *testing.T) {
 			"/**\n * HYS\n */\n\n",
 		},
 		{
-			[]string{
-				"f.cc", "f.cpp", "f.cs", "f.go", "f.hcl", "f.hh", "f.hpp", "f.m", "f.mm", "f.proto",
-				"f.rs", "f.swift", "f.dart", "f.groovy", "f.v", "f.sv", "f.php",
-			},
+			[]string{"f.cc", "f.cpp", "f.cs", "f.go", "f.hcl", "f.hh", "f.hpp", "f.m", "f.mm", "f.proto",
+				"f.rs", "f.swift", "f.dart", "f.groovy", "f.v", "f.sv", "f.php"},
 			"// HYS\n\n",
 		},
 		{
