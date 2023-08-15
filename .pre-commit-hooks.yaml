@@ -1,0 +1,5 @@
+- id: addlicense
+  name: Add copyright headers
+  entry: addlicense
+  language: golang
+  types: [text]
