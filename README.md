@@ -64,6 +64,21 @@ appropriate addlicense flags:
 docker run -it -v ${PWD}:/src ghcr.io/google/addlicense -c "Google LLC" *.go
 ```
 
+## Running with pre-commit
+
+This is the official [pre-commit hook](https://pre-commit.com/) for addlicense.
+
+Activate by adding it to your `.pre-commit-config.yaml`:
+
+```bash
+repos:
+- repo: https://github.com/google/addlicense
+  rev: <latest tag>
+  hooks:
+  - id: addlicense
+    args: [ "-c", "Company, Inc", "*.go" ]
+```
+
 ## license
 
 Apache 2.0

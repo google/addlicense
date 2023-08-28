@@ -1,0 +1,6 @@
+- id: addlicense
+  name: addlicense
+  description: Add copyright license header to source code.
+  entry: addlicense
+  types: [text]
+  language: golang
