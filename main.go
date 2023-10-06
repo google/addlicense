@@ -315,7 +315,7 @@ func licenseHeader(path string, tmpl *template.Template, data licenseData) ([]by
 		// handle various cmake files
 		if base == "cmakelists.txt" || strings.HasSuffix(base, ".cmake.in") || strings.HasSuffix(base, ".cmake") {
 			lic, err = executeTemplate(tmpl, data, "", "# ", "")
-		} else if base == "Makefile" || base == "makefile" || strings.HasSuffix(base, ".mk")  { // handle various make files
+		} else if base == "Makefile" || base == "makefile" || strings.HasSuffix(base, ".mk") { // handle various make files
 			lic, err = executeTemplate(tmpl, data, "", "# ", "")
 		}
 	}
@@ -376,7 +376,7 @@ func hasLicense(b []byte) bool {
 	if len(b) < 1000 {
 		n = len(b)
 	}
-	return bytes.Contains(bytes.ToLower(b[:n]), []byte("copyright")) ||
+	return bytes.Contains(bytes.ToLower(b[:n]), []byte("# copyright")) ||
 		bytes.Contains(bytes.ToLower(b[:n]), []byte("mozilla public")) ||
 		bytes.Contains(bytes.ToLower(b[:n]), []byte("spdx-license-identifier"))
 }
