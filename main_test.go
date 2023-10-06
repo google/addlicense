@@ -340,7 +340,7 @@ func TestLicenseHeader(t *testing.T) {
 			"(**\n   HYS\n*)\n\n",
 		},
 		{
-			[]string{"cmakelists.txt", "f.cmake", "f.cmake.in"},
+			[]string{"cmakelists.txt", "f.cmake", "f.cmake.in", "makefile", "Makefile", "f.mk"},
 			"# HYS\n\n",
 		},
 
