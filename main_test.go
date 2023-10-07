@@ -395,6 +395,10 @@ func TestHasLicense(t *testing.T) {
 
 		{"Copyright 2000", true},
 		{"CoPyRiGhT 2000", true},
+		{"// Copyright 2000", true},
+		{"# CopyRight 2000", true},
+		{"/*\n * CopyRight 2000", true},
+		{"// SPDX-License-Identifier: MIT", true},
 		{"Subject to the terms of the Mozilla Public License", true},
 		{"SPDX-License-Identifier: MIT", true},
 		{"spdx-license-identifier: MIT", true},
