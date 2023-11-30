@@ -230,6 +230,7 @@ func walk(ch chan<- *file, start string) error {
 // fileMatches determines if path matches one of the provided file patterns.
 // Patterns are assumed to be valid.
 func fileMatches(path string, patterns []string) bool {
+	path = filepath.ToSlash(path)
 	for _, p := range patterns {
 		// ignore error, since we assume patterns are valid
 		if match, _ := doublestar.Match(p, path); match {
