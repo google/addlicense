@@ -312,11 +312,11 @@ func TestLicenseHeader(t *testing.T) {
 		},
 		{
 			[]string{"f.cc", "f.cpp", "f.cs", "f.go", "f.hcl", "f.hh", "f.hpp", "f.m", "f.mm", "f.proto",
-				"f.rs", "f.swift", "f.dart", "f.groovy", "f.v", "f.sv", "f.php"},
+				"f.rs", "f.swift", "f.dart", "f.groovy", "f.v", "f.sv", "f.php", "f.td", "f.pdll"},
 			"// HYS\n\n",
 		},
 		{
-			[]string{"f.py", "f.sh", "f.yaml", "f.yml", "f.dockerfile", "dockerfile", "f.rb", "gemfile", "f.tcl", "f.tf", "f.bzl", "f.pl", "f.pp", "build"},
+			[]string{"f.py", "f.sh", "f.yaml", "f.yml", "f.dockerfile", "dockerfile", "f.rb", "gemfile", "f.tcl", "f.tf", "f.bzl", "f.pl", "f.pp", "build", "f.bazel"},
 			"# HYS\n\n",
 		},
 		{
