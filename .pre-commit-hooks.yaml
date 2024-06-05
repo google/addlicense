@@ -1,0 +1,9 @@
+- id: addlicense
+  name: addlicense
+  description:
+    "AddLicense: Ensures source code files have copyright license headers."
+  entry: addlicense
+  language: golang
+  # language_version: ">1.16"
+  minimum_pre_commit_version: 3.0.0
+  require_serial: true
