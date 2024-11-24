@@ -1,0 +1,6 @@
+- id: addlicense
+  name: addlicense
+  description: Run addlicense to ensure source code files have copyright license headers
+  language: golang
+  entry: addlicense
+  minimum_pre_commit_version: 3.0.0  # pre-commit can bootstrap Go environment
