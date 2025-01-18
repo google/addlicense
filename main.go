@@ -331,7 +331,7 @@ func fileExtension(name string) string {
 
 var head = []string{
 	"#!",                       // shell script
-	"<?xml",                    // XML declaratioon
+	"<?xml",                    // XML declaration
 	"<!doctype",                // HTML doctype
 	"# encoding:",              // Ruby encoding
 	"# frozen_string_literal:", // Ruby interpreter instruction
@@ -350,7 +350,7 @@ func hashBang(b []byte) []byte {
 	}
 	first := strings.ToLower(string(line))
 	for _, h := range head {
-		if strings.HasPrefix(first, h) {
+		if strings.HasPrefix(first, h) || strings.HasPrefix(first, "\u200B") {
 			return line
 		}
 	}
