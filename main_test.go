@@ -336,6 +336,10 @@ func TestLicenseHeader(t *testing.T) {
 			"<!--\n HYS\n-->\n\n",
 		},
 		{
+			[]string{"f.ps1", "f.psm1"},
+			"<#\n HYS\n#>\n\n",
+		},
+		{
 			[]string{"f.ml", "f.mli", "f.mll", "f.mly"},
 			"(**\n   HYS\n*)\n\n",
 		},
