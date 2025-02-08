@@ -340,7 +340,7 @@ func TestLicenseHeader(t *testing.T) {
 			"(**\n   HYS\n*)\n\n",
 		},
 		{
-			[]string{"cmakelists.txt", "f.cmake", "f.cmake.in"},
+			[]string{"cmakelists.txt", "f.cmake", "f.cmake.in", "makefile", "Makefile", "f.mk"},
 			"# HYS\n\n",
 		},
 
@@ -395,6 +395,10 @@ func TestHasLicense(t *testing.T) {
 
 		{"Copyright 2000", true},
 		{"CoPyRiGhT 2000", true},
+		{"// Copyright 2000", true},
+		{"# CopyRight 2000", true},
+		{"/*\n * CopyRight 2000", true},
+		{"// SPDX-License-Identifier: MIT", true},
 		{"Subject to the terms of the Mozilla Public License", true},
 		{"SPDX-License-Identifier: MIT", true},
 		{"spdx-license-identifier: MIT", true},
