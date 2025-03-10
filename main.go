@@ -342,13 +342,22 @@ func extractCopyrightHolder(filePath string) (string, error) {
 		return "", err
 	}
 
-	re := regexp.MustCompile(`(?i)Copyright\s+\d{4,}\s+(.+)`)
+	re := regexp.MustCompile(`(?i)Copyright\s*(?:\(c\))?\s*(?:\d{4}(?:-\d{4})?)?\s*(.+?)(?:\.|$|\n)`)
+
 	matches := re.FindStringSubmatch(string(content))
-	if len(matches) < 2 {
-		return "", nil
+
+	if len(matches) > 1 {
+		holder := strings.TrimSpace(matches[1])
+
+		if strings.Contains(holder, "\n") {
+			lines := strings.Split(holder, "\n")
+			holder = strings.TrimSpace(lines[0])
+		}
+
+		return holder, nil
 	}
 
-	return strings.TrimSpace(matches[1]), nil
+	return "", nil
 }
 
 // fileExtension returns the file extension of name, or the full name if there
