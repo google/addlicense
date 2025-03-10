@@ -163,6 +163,13 @@ func main() {
 					if lic == nil { // Unknown fileExtension
 						return nil
 					}
+
+					// Extract current copyright holder from the file
+					currentHolder, err := extractCopyrightHolder(f.path)
+					if err != nil {
+						log.Printf("%s: %v", f.path, err)
+						return err
+					}
 					// Check if file has a license
 					hasLicense, err := fileHasLicense(f.path)
 					if err != nil {
@@ -172,6 +179,11 @@ func main() {
 					if !hasLicense {
 						fmt.Printf("%s\n", f.path)
 						return errors.New("missing license header")
+					}
+					// If the copyright holder does not match the expected value
+					if currentHolder != *holder {
+						fmt.Printf("%s: incorrect copyright holder (expected: %s, found: %s)\n", f.path, *holder, currentHolder)
+						return errors.New("incorrect copyright holder")
 					}
 				} else {
 					modified, err := addLicense(f.path, f.mode, t, data)
@@ -318,6 +330,25 @@ func licenseHeader(path string, tmpl *template.Template, data licenseData) ([]by
 		}
 	}
 	return lic, err
+}
+
+// extractCopyrightHolder reads the file and extracts the copyright holder.
+//
+// It looks for a copyright line in the format: "Copyright YYYY <Holder>".
+// Returns the extracted holder or an empty string if not found.
+func extractCopyrightHolder(filePath string) (string, error) {
+	content, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return "", err
+	}
+
+	re := regexp.MustCompile(`(?i)Copyright\s+\d{4,}\s+(.+)`)
+	matches := re.FindStringSubmatch(string(content))
+	if len(matches) < 2 {
+		return "", nil
+	}
+
+	return strings.TrimSpace(matches[1]), nil
 }
 
 // fileExtension returns the file extension of name, or the full name if there
