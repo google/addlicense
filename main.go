@@ -163,6 +163,25 @@ func main() {
 					if lic == nil { // Unknown fileExtension
 						return nil
 					}
+
+					// To check for empty files
+					fileInfo, err := os.Stat(f.path)
+					if err != nil {
+						log.Printf("%s: %v", f.path, err)
+						return err
+					}
+
+					// Skip empty files
+					if fileInfo.Size() == 0 {
+						return nil
+					}
+
+					// Extract current copyright holder from the file
+					currentHolder, err := extractCopyrightHolder(f.path)
+					if err != nil {
+						log.Printf("%s: %v", f.path, err)
+						return err
+					}
 					// Check if file has a license
 					hasLicense, err := fileHasLicense(f.path)
 					if err != nil {
@@ -173,7 +192,24 @@ func main() {
 						fmt.Printf("%s\n", f.path)
 						return errors.New("missing license header")
 					}
+					// If the copyright holder does not match the expected value
+					if currentHolder != *holder {
+						fmt.Printf("%s: incorrect copyright holder (expected: %s, found: %s)\n", f.path, *holder, currentHolder)
+						return errors.New("incorrect copyright holder")
+					}
 				} else {
+					// To check for empty files
+					fileInfo, err := os.Stat(f.path)
+					if err != nil {
+						log.Printf("%s: %v", f.path, err)
+						return err
+					}
+
+					// Skip empty files
+					if fileInfo.Size() == 0 {
+						return nil
+					}
+
 					modified, err := addLicense(f.path, f.mode, t, data)
 					if err != nil {
 						log.Printf("%s: %v", f.path, err)
@@ -295,7 +331,7 @@ func licenseHeader(path string, tmpl *template.Template, data licenseData) ([]by
 		lic, err = executeTemplate(tmpl, data, "/**", " * ", " */")
 	case ".cc", ".cpp", ".cs", ".go", ".hcl", ".hh", ".hpp", ".m", ".mm", ".proto", ".rs", ".swift", ".dart", ".groovy", ".v", ".sv":
 		lic, err = executeTemplate(tmpl, data, "", "// ", "")
-	case ".py", ".sh", ".yaml", ".yml", ".dockerfile", "dockerfile", ".rb", "gemfile", ".tcl", ".tf", ".bzl", ".pl", ".pp", "build", ".build", ".toml":
+	case ".py", ".sh", ".yaml", ".yml", ".dockerfile", "dockerfile", ".rb", "gemfile", ".tcl", ".tf", ".bzl", ".pl", ".pp", "build", ".build", ".toml", ".spec":
 		lic, err = executeTemplate(tmpl, data, "", "# ", "")
 	case ".el", ".lisp":
 		lic, err = executeTemplate(tmpl, data, "", ";; ", "")
@@ -318,6 +354,38 @@ func licenseHeader(path string, tmpl *template.Template, data licenseData) ([]by
 		}
 	}
 	return lic, err
+}
+
+// extractCopyrightHolder reads the file and extracts the copyright holder.
+//
+// It looks for a copyright line in the format: "Copyright YYYY <Holder>".
+// Returns the extracted holder or an empty string if not found.
+func extractCopyrightHolder(filePath string) (string, error) {
+	content, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return "", err
+	}
+
+	re := regexp.MustCompile(`(?i)Copyright\s*(?:\(c\))?\s*(?:\d{4}(?:[-,]\d{4})*(?:,\d{4})*)\s+(.+?)(?:\s+All rights reserved|\.|$|\n)`)
+	matches := re.FindStringSubmatch(string(content))
+
+	if len(matches) > 1 {
+		return strings.TrimSpace(matches[1]), nil
+	}
+
+	re = regexp.MustCompile(`(?i)Copyright\s*(?:\(c\))?\s*(.+?)(?:\s+All rights reserved|\.|$|\n)`)
+	matches = re.FindStringSubmatch(string(content))
+
+	if len(matches) > 1 {
+
+		holder := strings.TrimSpace(matches[1])
+		yearPattern := regexp.MustCompile(`^\d{4}(?:[-,]\d{4})*(?:,\d{4})*\s+`)
+		holder = yearPattern.ReplaceAllString(holder, "")
+
+		return strings.TrimSpace(holder), nil
+	}
+
+	return "", nil
 }
 
 // fileExtension returns the file extension of name, or the full name if there
