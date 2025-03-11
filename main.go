@@ -198,6 +198,18 @@ func main() {
 						return errors.New("incorrect copyright holder")
 					}
 				} else {
+					// To check for empty files
+					fileInfo, err := os.Stat(f.path)
+					if err != nil {
+						log.Printf("%s: %v", f.path, err)
+						return err
+					}
+
+					// Skip empty files
+					if fileInfo.Size() == 0 {
+						return nil
+					}
+
 					modified, err := addLicense(f.path, f.mode, t, data)
 					if err != nil {
 						log.Printf("%s: %v", f.path, err)
