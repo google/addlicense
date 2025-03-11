@@ -342,19 +342,23 @@ func extractCopyrightHolder(filePath string) (string, error) {
 		return "", err
 	}
 
-	re := regexp.MustCompile(`(?i)Copyright\s*(?:\(c\))?\s*(?:\d{4}(?:-\d{4})?)?\s*(.+?)(?:\.|$|\n)`)
-
+	re := regexp.MustCompile(`(?i)Copyright\s*(?:\(c\))?\s*(?:\d{4}(?:[-,]\d{4})*(?:,\d{4})*)\s+(.+?)(?:\s+All rights reserved|\.|$|\n)`)
 	matches := re.FindStringSubmatch(string(content))
 
 	if len(matches) > 1 {
+		return strings.TrimSpace(matches[1]), nil
+	}
+
+	re = regexp.MustCompile(`(?i)Copyright\s*(?:\(c\))?\s*(.+?)(?:\s+All rights reserved|\.|$|\n)`)
+	matches = re.FindStringSubmatch(string(content))
+
+	if len(matches) > 1 {
+
 		holder := strings.TrimSpace(matches[1])
+		yearPattern := regexp.MustCompile(`^\d{4}(?:[-,]\d{4})*(?:,\d{4})*\s+`)
+		holder = yearPattern.ReplaceAllString(holder, "")
 
-		if strings.Contains(holder, "\n") {
-			lines := strings.Split(holder, "\n")
-			holder = strings.TrimSpace(lines[0])
-		}
-
-		return holder, nil
+		return strings.TrimSpace(holder), nil
 	}
 
 	return "", nil
