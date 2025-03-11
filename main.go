@@ -164,6 +164,18 @@ func main() {
 						return nil
 					}
 
+					// To check for empty files
+					fileInfo, err := os.Stat(f.path)
+					if err != nil {
+						log.Printf("%s: %v", f.path, err)
+						return err
+					}
+
+					// Skip empty files
+					if fileInfo.Size() == 0 {
+						return nil
+					}
+
 					// Extract current copyright holder from the file
 					currentHolder, err := extractCopyrightHolder(f.path)
 					if err != nil {
