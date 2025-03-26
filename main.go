@@ -289,24 +289,59 @@ func licenseHeader(path string, tmpl *template.Template, data licenseData) ([]by
 	base := strings.ToLower(filepath.Base(path))
 
 	switch fileExtension(base) {
-	case ".c", ".h", ".gv", ".java", ".scala", ".kt", ".kts":
+	case
+		".c", ".h",
+		".gv",
+		".java",
+		".kt", ".kts",
+		".scala":
 		lic, err = executeTemplate(tmpl, data, "/*", " * ", " */")
-	case ".js", ".mjs", ".cjs", ".jsx", ".tsx", ".css", ".scss", ".sass", ".ts":
+	case
+		".css", ".scss", ".sass",
+		".js", ".mjs", ".cjs", ".jsx",
+		".ts", ".tsx":
 		lic, err = executeTemplate(tmpl, data, "/**", " * ", " */")
-	case ".cc", ".cpp", ".cs", ".go", ".hcl", ".hh", ".hpp", ".m", ".mm", ".proto", ".rs", ".swift", ".dart", ".groovy", ".v", ".sv":
+	case
+		".cc", ".cpp", ".hh", ".hpp",
+		".cs",
+		".dart",
+		".go",
+		".groovy",
+		".hcl",
+		".m", ".mm",
+		".php",
+		".proto",
+		".rs",
+		".swift",
+		".v", ".sv":
 		lic, err = executeTemplate(tmpl, data, "", "// ", "")
-	case ".py", ".sh", ".yaml", ".yml", ".dockerfile", "dockerfile", ".rb", "gemfile", ".tcl", ".tf", ".bzl", ".pl", ".pp", "build", ".build", ".toml":
+	case
+		".bzl", "build", ".build",
+		".dockerfile", "dockerfile",
+		".pl",
+		".pp",
+		".py",
+		".rb", "gemfile",
+		".sh",
+		".tcl",
+		".tf",
+		".toml",
+		".yaml", ".yml":
 		lic, err = executeTemplate(tmpl, data, "", "# ", "")
 	case ".el", ".lisp":
 		lic, err = executeTemplate(tmpl, data, "", ";; ", "")
 	case ".erl":
 		lic, err = executeTemplate(tmpl, data, "", "% ", "")
-	case ".hs", ".sql", ".sdl":
+	case
+		".hs",
+		".sql", ".sdl":
 		lic, err = executeTemplate(tmpl, data, "", "-- ", "")
-	case ".html", ".xml", ".vue", ".wxi", ".wxl", ".wxs":
+	case
+		".html",
+		".vue",
+		".wxi", ".wxl", ".wxs",
+		".xml":
 		lic, err = executeTemplate(tmpl, data, "<!--", " ", "-->")
-	case ".php":
-		lic, err = executeTemplate(tmpl, data, "", "// ", "")
 	case ".j2":
 		lic, err = executeTemplate(tmpl, data, "{#", "", "#}")
 	case ".ml", ".mli", ".mll", ".mly":
