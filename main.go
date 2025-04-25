@@ -318,7 +318,7 @@ func licenseHeader(path string, tmpl *template.Template, data licenseData) ([]by
 	case
 		".bzl", "build", ".build",
 		".dockerfile", "dockerfile",
-    ".nix",
+		".nix",
 		".pl",
 		".pp",
 		".py",
