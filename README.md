@@ -16,15 +16,22 @@ addlicense requires go 1.16 or later.
 
     addlicense [flags] pattern [pattern ...]
 
-    -c copyright holder (defaults to "Google LLC")
-    -f custom license file (no default)
-    -l license type: apache, bsd, mit, mpl (defaults to "apache")
-    -y year (defaults to current year)
-    -check check only mode: verify presence of license headers and exit with non-zero code if missing
+    -c      copyright holder (default "Google LLC")
+    -check  check only mode: verify presence of license headers and exit with non-zero code if missing
+    -f      license file
     -ignore file patterns to ignore, for example: -ignore **/*.go -ignore vendor/**
+    -l      license type: apache, bsd, mit, mpl (default "apache")
+    -s      Include SPDX identifier in license header. Set -s=only to only include SPDX identifier.
+    -v      verbose mode: print the name of the files that are modified
+    -y      copyright year(s) (default is the current year)
 
 The pattern argument can be provided multiple times, and may also refer
-to single files.
+to single files.  Directories are processed recursively.
+
+For example, to run addlicense across everything in the current directory and
+all subdirectories:
+
+    addlicense .
 
 The `-ignore` flag can use any pattern [supported by
 doublestar](https://github.com/bmatcuk/doublestar#patterns).
@@ -54,7 +61,22 @@ Finally, to run it, mount the directory you want to scan to `/src` and pass the
 appropriate addlicense flags:
 
 ```bash
-docker run -it ghcr.io/google/addlicense -v ${PWD}:/src -c "Google LLC" *.go
+docker run -it -v ${PWD}:/src ghcr.io/google/addlicense -c "Google LLC" *.go
+```
+
+## Running with pre-commit
+
+This is the official [pre-commit hook](https://pre-commit.com/) for addlicense.
+
+Activate by adding it to your `.pre-commit-config.yaml`:
+
+```bash
+repos:
+- repo: https://github.com/google/addlicense
+  rev: <latest tag>
+  hooks:
+  - id: addlicense
+    args: [ "-c", "Company, Inc", "*.go" ]
 ```
 
 ## license
