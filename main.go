@@ -323,7 +323,7 @@ func licenseHeader(path string, tmpl *template.Template, data licenseData) ([]by
 		".pl",
 		".pp",
 		".py",
-		".rb", "gemfile",
+		".rb", ".ru", "gemfile",
 		".sh",
 		".tcl",
 		".tf",
@@ -374,6 +374,7 @@ var head = []string{
 	"<!doctype",                // HTML doctype
 	"# encoding:",              // Ruby encoding
 	"# frozen_string_literal:", // Ruby interpreter instruction
+	"#\\",                      // Ruby Rack directive https://github.com/rack/rack/wiki/(tutorial)-rackup-howto
 	"<?php",                    // PHP opening tag
 	"# escape",                 // Dockerfile directive https://docs.docker.com/engine/reference/builder/#parser-directives
 	"# syntax",                 // Dockerfile directive https://docs.docker.com/engine/reference/builder/#parser-directives

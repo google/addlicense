@@ -241,6 +241,7 @@ func TestAddLicense(t *testing.T) {
 		{"<!DOCTYPE HTML>\ncontent", "<!DOCTYPE HTML>\n// HYS\n\ncontent", true},
 		{"# encoding: UTF-8\ncontent", "# encoding: UTF-8\n// HYS\n\ncontent", true},
 		{"# frozen_string_literal: true\ncontent", "# frozen_string_literal: true\n// HYS\n\ncontent", true},
+		{"#\\ -w -p 8765\ncontent", "#\\ -w -p 8765\n// HYS\n\ncontent", true},
 		{"<?php\ncontent", "<?php\n// HYS\n\ncontent", true},
 		{"# escape: `\ncontent", "# escape: `\n// HYS\n\ncontent", true},
 		{"# syntax: docker/dockerfile:1.3\ncontent", "# syntax: docker/dockerfile:1.3\n// HYS\n\ncontent", true},
@@ -316,7 +317,7 @@ func TestLicenseHeader(t *testing.T) {
 			"// HYS\n\n",
 		},
 		{
-			[]string{"f.py", "f.sh", "f.yaml", "f.yml", "f.dockerfile", "dockerfile", "f.rb", "gemfile", "f.tcl", "f.tf", "f.bzl", "f.pl", "f.pp", "build"},
+			[]string{"f.py", "f.sh", "f.yaml", "f.yml", "f.dockerfile", "dockerfile", "f.rb", "gemfile", "f.ru", "f.tcl", "f.tf", "f.bzl", "f.pl", "f.pp", "build"},
 			"# HYS\n\n",
 		},
 		{
