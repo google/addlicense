@@ -230,6 +230,8 @@ func walk(ch chan<- *file, start string) error {
 // fileMatches determines if path matches one of the provided file patterns.
 // Patterns are assumed to be valid.
 func fileMatches(path string, patterns []string) bool {
+	// handle both \ and /
+	path = filepath.ToSlash(path)
 	for _, p := range patterns {
 		// ignore error, since we assume patterns are valid
 		if match, _ := doublestar.Match(p, path); match {
@@ -289,28 +291,65 @@ func licenseHeader(path string, tmpl *template.Template, data licenseData) ([]by
 	base := strings.ToLower(filepath.Base(path))
 
 	switch fileExtension(base) {
-	case ".c", ".h", ".gv", ".java", ".scala", ".kt", ".kts":
+	case
+		".c", ".h",
+		".gv",
+		".java",
+		".kt", ".kts",
+		".scala":
 		lic, err = executeTemplate(tmpl, data, "/*", " * ", " */")
-	case ".js", ".mjs", ".cjs", ".jsx", ".tsx", ".css", ".scss", ".sass", ".ts":
+	case
+		".css", ".scss", ".sass",
+		".js", ".mjs", ".cjs", ".jsx",
+		".ts", ".tsx":
 		lic, err = executeTemplate(tmpl, data, "/**", " * ", " */")
-	case ".cc", ".cpp", ".cs", ".go", ".hcl", ".hh", ".hpp", ".m", ".mm", ".proto", ".rs", ".swift", ".dart", ".groovy", ".v", ".sv":
+	case
+		".cc", ".cpp", ".hh", ".hpp",
+		".cs",
+		".dart",
+		".go",
+		".groovy",
+		".hcl",
+		".m", ".mm",
+		".php",
+		".proto",
+		".rs",
+		".swift",
+		".v", ".sv":
 		lic, err = executeTemplate(tmpl, data, "", "// ", "")
-	case ".py", ".sh", ".yaml", ".yml", ".dockerfile", "dockerfile", ".rb", "gemfile", ".tcl", ".tf", ".bzl", ".pl", ".pp", "build", "build.bazel", ".build", ".toml":
+	case
+		".bzl", "build", "build.bazel", ".build",
+		".dockerfile", "dockerfile",
+		".pl",
+		".pp",
+		".py",
+		".rb", "gemfile",
+		".sh",
+		".tcl",
+		".tf",
+		".toml",
+		".yaml", ".yml":
 		lic, err = executeTemplate(tmpl, data, "", "# ", "")
 	case ".el", ".lisp":
 		lic, err = executeTemplate(tmpl, data, "", ";; ", "")
 	case ".erl":
 		lic, err = executeTemplate(tmpl, data, "", "% ", "")
-	case ".hs", ".sql", ".sdl":
+	case
+		".hs",
+		".sql", ".sdl":
 		lic, err = executeTemplate(tmpl, data, "", "-- ", "")
-	case ".html", ".xml", ".vue", ".wxi", ".wxl", ".wxs":
+	case
+		".html", ".htm",
+		".vue",
+		".wxi", ".wxl", ".wxs",
+		".xml":
 		lic, err = executeTemplate(tmpl, data, "<!--", " ", "-->")
-	case ".php":
-		lic, err = executeTemplate(tmpl, data, "", "// ", "")
 	case ".j2":
 		lic, err = executeTemplate(tmpl, data, "{#", "", "#}")
 	case ".ml", ".mli", ".mll", ".mly":
 		lic, err = executeTemplate(tmpl, data, "(**", "   ", "*)")
+	case ".ps1", ".psm1":
+		lic, err = executeTemplate(tmpl, data, "<#", " ", "#>")
 	default:
 		// handle various cmake files
 		if base == "cmakelists.txt" || strings.HasSuffix(base, ".cmake.in") || strings.HasSuffix(base, ".cmake") {
