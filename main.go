@@ -290,6 +290,7 @@ func licenseHeader(path string, tmpl *template.Template, data licenseData) ([]by
 	var err error
 	base := strings.ToLower(filepath.Base(path))
 
+	// When adding an extension, also add it to TestLicenseHeader in main_test.go
 	switch fileExtension(base) {
 	case
 		".c", ".h",
@@ -318,7 +319,7 @@ func licenseHeader(path string, tmpl *template.Template, data licenseData) ([]by
 		".v", ".sv":
 		lic, err = executeTemplate(tmpl, data, "", "// ", "")
 	case
-		".bzl", "build", "build.bazel", ".build",
+		".bzl", ".bazel", "build", ".build",
 		".dockerfile", "dockerfile",
 		".nix",
 		".pl",
