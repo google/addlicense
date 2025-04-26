@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -58,7 +58,7 @@ var (
 	license   = flag.String("l", "apache", "license type: apache, bsd, mit, mpl")
 	licensef  = flag.String("f", "", "license file")
 	year      = flag.String("y", fmt.Sprint(time.Now().Year()), "copyright year(s)")
-	verbose   = flag.Bool("v", false, "verbose mode: print the name of the files that are modified")
+	verbose   = flag.Bool("v", false, "verbose mode: print the name of the files that are modified or were skipped")
 	checkonly = flag.Bool("check", false, "check only mode: verify presence of license headers and exit with non-zero code if missing")
 )
 
@@ -217,7 +217,9 @@ func walk(ch chan<- *file, start string) error {
 			return nil
 		}
 		if fileMatches(path, ignorePatterns) {
-			log.Printf("skipping: %s", path)
+			if *verbose {
+				log.Printf("skipping: %s", path)
+			}
 			return nil
 		}
 		ch <- &file{path, fi.Mode()}
@@ -228,6 +230,8 @@ func walk(ch chan<- *file, start string) error {
 // fileMatches determines if path matches one of the provided file patterns.
 // Patterns are assumed to be valid.
 func fileMatches(path string, patterns []string) bool {
+	// handle both \ and /
+	path = filepath.ToSlash(path)
 	for _, p := range patterns {
 		// ignore error, since we assume patterns are valid
 		if match, _ := doublestar.Match(p, path); match {
@@ -287,26 +291,65 @@ func licenseHeader(path string, tmpl *template.Template, data licenseData) ([]by
 	base := strings.ToLower(filepath.Base(path))
 
 	switch fileExtension(base) {
-	case ".c", ".h", ".gv", ".java", ".scala", ".kt", ".kts":
+	case
+		".c", ".h",
+		".gv",
+		".java",
+		".kt", ".kts",
+		".scala":
 		lic, err = executeTemplate(tmpl, data, "/*", " * ", " */")
-	case ".js", ".mjs", ".cjs", ".jsx", ".tsx", ".css", ".scss", ".sass", ".tf", ".ts":
+	case
+		".css", ".scss", ".sass",
+		".js", ".mjs", ".cjs", ".jsx",
+		".ts", ".tsx":
 		lic, err = executeTemplate(tmpl, data, "/**", " * ", " */")
-	case ".cc", ".cpp", ".cs", ".go", ".hcl", ".hh", ".hpp", ".m", ".mm", ".proto", ".rs", ".swift", ".dart", ".groovy", ".v", ".sv":
+	case
+		".cc", ".cpp", ".hh", ".hpp",
+		".cs",
+		".dart",
+		".go",
+		".groovy",
+		".hcl",
+		".m", ".mm",
+		".php",
+		".proto",
+		".rs",
+		".swift",
+		".v", ".sv":
 		lic, err = executeTemplate(tmpl, data, "", "// ", "")
-	case ".py", ".sh", ".bash", ".zsh", ".yaml", ".yml", ".dockerfile", "dockerfile", ".rb", "gemfile", ".tcl", ".bzl", ".pl", ".pp":
+	case
+		".bzl", "build", "build.bazel", ".build",
+		".dockerfile", "dockerfile",
+		".pl",
+		".pp",
+		".py",
+		".rb", ".ru", "gemfile",
+		".sh", ".bash", ".zsh",
+		".tcl",
+		".tf",
+		".toml",
+		".yaml", ".yml":
 		lic, err = executeTemplate(tmpl, data, "", "# ", "")
 	case ".el", ".lisp":
 		lic, err = executeTemplate(tmpl, data, "", ";; ", "")
 	case ".erl":
 		lic, err = executeTemplate(tmpl, data, "", "% ", "")
-	case ".hs", ".sql", ".sdl":
+	case
+		".hs",
+		".sql", ".sdl":
 		lic, err = executeTemplate(tmpl, data, "", "-- ", "")
-	case ".html", ".xml", ".vue", ".wxi", ".wxl", ".wxs":
+	case
+		".html", ".htm",
+		".vue",
+		".wxi", ".wxl", ".wxs",
+		".xml":
 		lic, err = executeTemplate(tmpl, data, "<!--", " ", "-->")
-	case ".php":
-		lic, err = executeTemplate(tmpl, data, "", "// ", "")
+	case ".j2":
+		lic, err = executeTemplate(tmpl, data, "{#", "", "#}")
 	case ".ml", ".mli", ".mll", ".mly":
 		lic, err = executeTemplate(tmpl, data, "(**", "   ", "*)")
+	case ".ps1", ".psm1":
+		lic, err = executeTemplate(tmpl, data, "<#", " ", "#>")
 	default:
 		// handle various cmake files
 		if base == "cmakelists.txt" || strings.HasSuffix(base, ".cmake.in") || strings.HasSuffix(base, ".cmake") {
@@ -331,6 +374,7 @@ var head = []string{
 	"<!doctype",                // HTML doctype
 	"# encoding:",              // Ruby encoding
 	"# frozen_string_literal:", // Ruby interpreter instruction
+	"#\\",                      // Ruby Rack directive https://github.com/rack/rack/wiki/(tutorial)-rackup-howto
 	"<?php",                    // PHP opening tag
 	"# escape",                 // Dockerfile directive https://docs.docker.com/engine/reference/builder/#parser-directives
 	"# syntax",                 // Dockerfile directive https://docs.docker.com/engine/reference/builder/#parser-directives

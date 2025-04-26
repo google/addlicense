@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -241,6 +241,7 @@ func TestAddLicense(t *testing.T) {
 		{"<!DOCTYPE HTML>\ncontent", "<!DOCTYPE HTML>\n// HYS\n\ncontent", true},
 		{"# encoding: UTF-8\ncontent", "# encoding: UTF-8\n// HYS\n\ncontent", true},
 		{"# frozen_string_literal: true\ncontent", "# frozen_string_literal: true\n// HYS\n\ncontent", true},
+		{"#\\ -w -p 8765\ncontent", "#\\ -w -p 8765\n// HYS\n\ncontent", true},
 		{"<?php\ncontent", "<?php\n// HYS\n\ncontent", true},
 		{"# escape: `\ncontent", "# escape: `\n// HYS\n\ncontent", true},
 		{"# syntax: docker/dockerfile:1.3\ncontent", "# syntax: docker/dockerfile:1.3\n// HYS\n\ncontent", true},
@@ -307,7 +308,7 @@ func TestLicenseHeader(t *testing.T) {
 			"/*\n * HYS\n */\n\n",
 		},
 		{
-			[]string{"f.js", "f.mjs", "f.cjs", "f.jsx", "f.tsx", "f.css", "f.scss", "f.sass", "f.tf", "f.ts"},
+			[]string{"f.js", "f.mjs", "f.cjs", "f.jsx", "f.tsx", "f.css", "f.scss", "f.sass", "f.ts"},
 			"/**\n * HYS\n */\n\n",
 		},
 		{
@@ -316,7 +317,7 @@ func TestLicenseHeader(t *testing.T) {
 			"// HYS\n\n",
 		},
 		{
-			[]string{"f.py", "f.sh", "f.bash", "f.zsh", "f.yaml", "f.yml", "f.dockerfile", "dockerfile", "f.rb", "gemfile", "f.tcl", "f.bzl", "f.pl", "f.pp"},
+			[]string{"f.py", "f.sh", "f.bash", "f.zsh", "f.yaml", "f.yml", "f.dockerfile", "dockerfile", "f.rb", "gemfile", "f.ru", "f.tcl", "f.tf", "f.bzl", "f.pl", "f.pp", "build"},
 			"# HYS\n\n",
 		},
 		{
@@ -332,8 +333,12 @@ func TestLicenseHeader(t *testing.T) {
 			"-- HYS\n\n",
 		},
 		{
-			[]string{"f.html", "f.xml", "f.vue", "f.wxi", "f.wxl", "f.wxs"},
+			[]string{"f.html", "f.htm", "f.xml", "f.vue", "f.wxi", "f.wxl", "f.wxs"},
 			"<!--\n HYS\n-->\n\n",
+		},
+		{
+			[]string{"f.ps1", "f.psm1"},
+			"<#\n HYS\n#>\n\n",
 		},
 		{
 			[]string{"f.ml", "f.mli", "f.mll", "f.mly"},
