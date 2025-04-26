@@ -12,4 +12,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-resource "null_resource" "dummy" {}
+[package]
+name = "not-a-real-crate"
