@@ -344,12 +344,16 @@ func TestLicenseHeader(t *testing.T) {
 		},
 		{
 			[]string{
+				"f.awk",
 				"f.bzl", "f.bazel", "build", "f.build",
 				"f.dockerfile", "dockerfile",
+				"f.ex", "f.exs",
+				"f.jl",
 				"f.nix",
 				"f.pl",
 				"f.pp",
 				"f.py",
+				"f.raku",
 				"f.rb", "f.ru", "gemfile",
 				"f.sh", "f.bash", "f.zsh",
 				"f.tcl",
@@ -361,7 +365,9 @@ func TestLicenseHeader(t *testing.T) {
 		},
 		{
 			[]string{
-				"f.el", "f.lisp",
+				"f.el",
+				"f.lisp",
+				"f.scm",
 			},
 			";; HYS\n\n",
 		},
@@ -374,6 +380,7 @@ func TestLicenseHeader(t *testing.T) {
 		{
 			[]string{
 				"f.hs",
+				"f.lua",
 				"f.sql", "f.sdl",
 			},
 			"-- HYS\n\n",
@@ -404,6 +411,12 @@ func TestLicenseHeader(t *testing.T) {
 				"f.ps1", "f.psm1",
 			},
 			"<#\n HYS\n#>\n\n",
+		},
+		{
+			[]string{
+				"f.vim",
+			},
+			"\" HYS\n\n",
 		},
 		{
 			[]string{
