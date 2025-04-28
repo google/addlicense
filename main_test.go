@@ -241,6 +241,7 @@ func TestAddLicense(t *testing.T) {
 		{"<!DOCTYPE HTML>\ncontent", "<!DOCTYPE HTML>\n// HYS\n\ncontent", true},
 		{"# encoding: UTF-8\ncontent", "# encoding: UTF-8\n// HYS\n\ncontent", true},
 		{"# frozen_string_literal: true\ncontent", "# frozen_string_literal: true\n// HYS\n\ncontent", true},
+		{"#\\ -w -p 8765\ncontent", "#\\ -w -p 8765\n// HYS\n\ncontent", true},
 		{"<?php\ncontent", "<?php\n// HYS\n\ncontent", true},
 		{"# escape: `\ncontent", "# escape: `\n// HYS\n\ncontent", true},
 		{"# syntax: docker/dockerfile:1.3\ncontent", "# syntax: docker/dockerfile:1.3\n// HYS\n\ncontent", true},
@@ -299,58 +300,139 @@ func TestLicenseHeader(t *testing.T) {
 		want  string   // expected result of executing template
 	}{
 		{
-			[]string{"f.unknown"},
+			[]string{
+				"f.unknown",
+				"f.jpg",
+				"README",
+			},
 			"",
 		},
 		{
-			[]string{"f.c", "f.h", "f.gv", "f.java", "f.scala", "f.kt", "f.kts"},
+			[]string{
+				"f.c", "f.h",
+				"f.gv",
+				"f.java",
+				"f.kt", "f.kts",
+				"f.scala",
+			},
 			"/*\n * HYS\n */\n\n",
 		},
 		{
-			[]string{"f.js", "f.mjs", "f.cjs", "f.jsx", "f.tsx", "f.css", "f.scss", "f.sass", "f.ts"},
+			[]string{
+				"f.css", "f.scss", "f.sass",
+				"f.js", "f.mjs", "f.cjs", "f.jsx",
+				"f.ts", "f.tsx",
+			},
 			"/**\n * HYS\n */\n\n",
 		},
 		{
-			[]string{"f.cc", "f.cpp", "f.cs", "f.go", "f.hcl", "f.hh", "f.hpp", "f.m", "f.mm", "f.proto",
-				"f.rs", "f.swift", "f.dart", "f.groovy", "f.v", "f.sv", "f.php"},
+			[]string{
+				"f.cc", "f.cpp", "f.hh", "f.hpp",
+				"f.cs",
+				"f.dart",
+				"f.go",
+				"f.groovy",
+				"f.hcl",
+				"f.m", "f.mm",
+				"f.php",
+				"f.proto",
+				"f.rs",
+				"f.swift",
+				"f.v", "f.sv",
+			},
 			"// HYS\n\n",
 		},
 		{
-			[]string{"f.py", "f.sh", "f.yaml", "f.yml", "f.dockerfile", "dockerfile", "f.rb", "gemfile", "f.tcl", "f.tf", "f.bzl", "f.pl", "f.pp", "f.graphql", "build"},
+			[]string{
+				"f.awk",
+				"f.bzl", "f.bazel", "build", "f.build",
+				"f.dockerfile", "dockerfile",
+				"f.ex", "f.exs",
+				"f.graphql",
+				"f.jl",
+				"f.nix",
+				"f.pl",
+				"f.pp",
+				"f.py",
+				"f.raku",
+				"f.rb", "f.ru", "gemfile",
+				"f.sh", "f.bash", "f.zsh",
+				"f.tcl",
+				"f.tf",
+				"f.toml",
+				"f.yaml", "f.yml",
+			},
 			"# HYS\n\n",
 		},
 		{
-			[]string{"f.el", "f.lisp"},
+			[]string{
+				"f.el",
+				"f.lisp",
+				"f.scm",
+			},
 			";; HYS\n\n",
 		},
 		{
-			[]string{"f.erl"},
+			[]string{
+				"f.erl",
+			},
 			"% HYS\n\n",
 		},
 		{
-			[]string{"f.hs", "f.sql", "f.sdl"},
+			[]string{
+				"f.hs",
+				"f.lua",
+				"f.sql", "f.sdl",
+			},
 			"-- HYS\n\n",
 		},
 		{
-			[]string{"f.html", "f.htm", "f.xml", "f.vue", "f.wxi", "f.wxl", "f.wxs"},
+			[]string{
+				"f.html", "f.htm",
+				"f.vue",
+				"f.xml",
+				"f.wxi", "f.wxl", "f.wxs",
+			},
 			"<!--\n HYS\n-->\n\n",
 		},
 		{
-			[]string{"f.ps1", "f.psm1"},
-			"<#\n HYS\n#>\n\n",
+			[]string{
+				".j2",
+			},
+			"{#\nHYS\n#}\n\n",
 		},
 		{
-			[]string{"f.ml", "f.mli", "f.mll", "f.mly"},
+			[]string{
+				"f.ml", "f.mli", "f.mll", "f.mly",
+			},
 			"(**\n   HYS\n*)\n\n",
 		},
 		{
-			[]string{"cmakelists.txt", "f.cmake", "f.cmake.in"},
+			[]string{
+				"f.ps1", "f.psm1",
+			},
+			"<#\n HYS\n#>\n\n",
+		},
+		{
+			[]string{
+				"f.vim",
+			},
+			"\" HYS\n\n",
+		},
+		{
+			[]string{
+				"cmakelists.txt", "f.cmake.in", "f.cmake",
+			},
 			"# HYS\n\n",
 		},
 
 		// ensure matches are case insenstive
 		{
-			[]string{"F.PY", "DoCkErFiLe"},
+			[]string{
+				"F.PY",
+				"BUILD",
+				"DoCkErFiLe",
+			},
 			"# HYS\n\n",
 		},
 	}
