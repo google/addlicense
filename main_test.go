@@ -348,6 +348,7 @@ func TestLicenseHeader(t *testing.T) {
 				"f.bzl", "f.bazel", "build", "f.build",
 				"f.dockerfile", "dockerfile",
 				"f.ex", "f.exs",
+				"f.graphql",
 				"f.jl",
 				"f.nix",
 				"f.pl",
