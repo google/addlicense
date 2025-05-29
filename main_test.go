@@ -319,7 +319,7 @@ func TestLicenseHeader(t *testing.T) {
 		},
 		{
 			[]string{
-				"f.css", "f.scss", "f.sass",
+				"f.css", "f.scss", "f.sass", "f.less",
 				"f.js", "f.mjs", "f.cjs", "f.jsx",
 				"f.ts", "f.tsx",
 			},
