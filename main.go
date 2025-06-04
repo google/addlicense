@@ -300,7 +300,7 @@ func licenseHeader(path string, tmpl *template.Template, data licenseData) ([]by
 		".scala":
 		lic, err = executeTemplate(tmpl, data, "/*", " * ", " */")
 	case
-		".css", ".scss", ".sass",
+		".css", ".scss", ".sass", ".less",
 		".js", ".mjs", ".cjs", ".jsx",
 		".ts", ".tsx":
 		lic, err = executeTemplate(tmpl, data, "/**", " * ", " */")
