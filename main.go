@@ -312,6 +312,7 @@ func licenseHeader(path string, tmpl *template.Template, data licenseData) ([]by
 		".groovy",
 		".hcl",
 		".m", ".mm",
+		".p4",
 		".php",
 		".proto",
 		".rs",
