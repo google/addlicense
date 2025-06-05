@@ -91,11 +91,33 @@ func executeTemplate(t *template.Template, d licenseData, top, mid, bot string) 
 		fmt.Fprintln(&out, top)
 	}
 	s := bufio.NewScanner(&buf)
+	lines := 0
 	for s.Scan() {
 		fmt.Fprintln(&out, strings.TrimRightFunc(mid+s.Text(), unicode.IsSpace))
+		lines++
 	}
 	if bot != "" {
 		fmt.Fprintln(&out, bot)
+	} else if lines > 3 && len(mid) < 80 {
+		// If the license does not specify a bottom suffix, add a line to separate the license
+		// header from the following code. For example:
+		//
+		// top, mid, bot = "", "# ", ""
+		//
+		//     # License Header
+		//     # ============================
+		//
+		//     Code starts here...
+		//
+		// top, mid, bot = "/**", " * ", " */"
+		//
+		//     /**
+		//      * License Header
+		//      */
+		//
+		//     Code starts here...
+		//
+		fmt.Fprintln(&out, mid + strings.Repeat("=", 80 - len(mid)))
 	}
 	fmt.Fprintln(&out)
 	return out.Bytes(), nil
