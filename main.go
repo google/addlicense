@@ -320,6 +320,7 @@ func licenseHeader(path string, tmpl *template.Template, data licenseData) ([]by
 		lic, err = executeTemplate(tmpl, data, "", "// ", "")
 	case
 		".awk",
+		".buckconfig", "buck",
 		".bzl", ".bazel", "build", ".build",
 		".dockerfile", "dockerfile",
 		".ex", ".exs",
