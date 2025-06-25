@@ -345,6 +345,7 @@ func TestLicenseHeader(t *testing.T) {
 		{
 			[]string{
 				"f.awk",
+				"f.buckconfig", "buck",
 				"f.bzl", "f.bazel", "build", "f.build",
 				"f.dockerfile", "dockerfile",
 				"f.ex", "f.exs",
