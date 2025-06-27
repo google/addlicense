@@ -4,3 +4,5 @@
   entry: addlicense
   types: [text]
   language: golang
+  minimum_pre_commit_version: 3.0.0
+  require_serial: true
