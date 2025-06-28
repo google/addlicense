@@ -1,4 +1,4 @@
-module github.com/google/addlicense
+module github.com/Spill-Tea/addlicense-pre-commit
 
 go 1.13
 
