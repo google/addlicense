@@ -15,12 +15,16 @@ archives:
   - format_overrides:
     - goos: windows
       format: zip
-    replacements:
-      darwin: macOS
-      linux: Linux
-      windows: Windows
-      386: i386
-      amd64: x86_64
+    name_template: >-
+      {{- .ProjectName }}_
+      {{- .Tag }}_
+      {{- if eq .Os "darwin" }}macOS
+      {{- else if eq .Os "windows" }}Windows
+      {{- else if eq .Os "linux" }}Linux
+      {{- else }}{{ .Os }}{{ end }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
     files:
     - LICENSE
 checksum:
