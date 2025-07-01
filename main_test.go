@@ -354,7 +354,7 @@ func TestLicenseHeader(t *testing.T) {
 				"f.nix",
 				"f.pl",
 				"f.pp",
-				"f.py",
+				"f.py", "f.pyx", "f.pxd",
 				"f.raku",
 				"f.rb", "f.ru", "gemfile",
 				"f.sh", "f.bash", "f.zsh",
