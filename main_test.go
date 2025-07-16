@@ -332,6 +332,7 @@ func TestLicenseHeader(t *testing.T) {
 				"f.dart",
 				"f.go",
 				"f.groovy",
+				"f.gradle",
 				"f.hcl",
 				"f.m", "f.mm",
 				"f.php",
