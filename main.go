@@ -21,8 +21,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	doublestar "github.com/bmatcuk/doublestar/v4"
-	"golang.org/x/sync/errgroup"
 	"io/ioutil"
 	"log"
 	"os"
@@ -31,6 +29,9 @@ import (
 	"strings"
 	"text/template"
 	"time"
+
+	doublestar "github.com/bmatcuk/doublestar/v4"
+	"golang.org/x/sync/errgroup"
 )
 
 const helpText = `Usage: addlicense [flags] pattern [pattern ...]
