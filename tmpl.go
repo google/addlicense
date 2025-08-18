@@ -52,7 +52,9 @@ type licenseData struct {
 // license, if recognized.
 func fetchTemplate(license string, templateFile string, spdx spdxFlag) (string, error) {
 	var t string
-	if spdx == spdxOnly {
+	if spdx == spdxStrict {
+		t = tmplSPDXStrict
+	} else if spdx == spdxOnly {
 		t = tmplSPDX
 	} else if templateFile != "" {
 		d, err := ioutil.ReadFile(templateFile)
@@ -144,6 +146,9 @@ License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at https://mozilla.org/MPL/2.0/.`
 
 const tmplSPDX = `{{ if .Holder }}Copyright{{ if .Year }} {{.Year}}{{ end }} {{.Holder}}
+{{ end }}SPDX-License-Identifier: {{.SPDXID}}`
+
+const tmplSPDXStrict = `{{if .Holder}}SPDX-FileCopyrightText: {{ if .Year }} {{.Year}}{{ end}} {{.Holder}}
 {{ end }}SPDX-License-Identifier: {{.SPDXID}}`
 
 const spdxSuffix = "\n\nSPDX-License-Identifier: {{.SPDXID}}"

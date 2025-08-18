@@ -63,13 +63,13 @@ var (
 )
 
 func init() {
+	flag.Var(&skipExtensionFlags, "skip", "[deprecated: see -ignore] file extensions to skip, for example: -skip rb -skip go")
+	flag.Var(&ignorePatterns, "ignore", "file patterns to ignore, for example: -ignore **/*.go -ignore vendor/**")
+	flag.Var(&spdx, "s", "Include SPDX identifier in license header. Set -s=only to only include SPDX identifier. Set -s=strict to only use SPDX tags.")
 	flag.Usage = func() {
 		fmt.Fprint(os.Stderr, helpText)
 		flag.PrintDefaults()
 	}
-	flag.Var(&skipExtensionFlags, "skip", "[deprecated: see -ignore] file extensions to skip, for example: -skip rb -skip go")
-	flag.Var(&ignorePatterns, "ignore", "file patterns to ignore, for example: -ignore **/*.go -ignore vendor/**")
-	flag.Var(&spdx, "s", "Include SPDX identifier in license header. Set -s=only to only include SPDX identifier.")
 }
 
 // stringSlice stores the results of a repeated command line flag as a string slice.
@@ -88,9 +88,10 @@ func (i *stringSlice) Set(value string) error {
 type spdxFlag string
 
 const (
-	spdxOff  spdxFlag = ""
-	spdxOn   spdxFlag = "true" // value set by flag package on bool flag
-	spdxOnly spdxFlag = "only"
+	spdxOff    spdxFlag = ""
+	spdxOn     spdxFlag = "true" // value set by flag package on bool flag
+	spdxOnly   spdxFlag = "only"
+	spdxStrict spdxFlag = "strict"
 )
 
 // IsBoolFlag causes a bare '-s' flag to be set as the string 'true'.  This
@@ -100,8 +101,8 @@ func (i *spdxFlag) String() string   { return string(*i) }
 
 func (i *spdxFlag) Set(value string) error {
 	v := spdxFlag(value)
-	if v != spdxOn && v != spdxOnly {
-		return fmt.Errorf("error: flag 's' expects '%v' or '%v'", spdxOn, spdxOnly)
+	if v != spdxOn && v != spdxStrict && v != spdxOnly {
+		return fmt.Errorf("error: flag 's' expects one of '%v' or '%v' or '%v'", spdxOn, spdxOnly, spdxStrict)
 	}
 	*i = v
 	return nil
