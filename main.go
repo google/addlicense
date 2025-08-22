@@ -393,6 +393,7 @@ var head = []string{
 	"<?php",                    // PHP opening tag
 	"# escape",                 // Dockerfile directive https://docs.docker.com/engine/reference/builder/#parser-directives
 	"# syntax",                 // Dockerfile directive https://docs.docker.com/engine/reference/builder/#parser-directives
+	"%YAML ",                   // YAML version directive https://yaml.org/spec/1.2.2/#681-yaml-directives
 }
 
 func hashBang(b []byte) []byte {
