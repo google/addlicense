@@ -359,7 +359,7 @@ func licenseHeader(path string, tmpl *template.Template, data licenseData) ([]by
 		".wxi", ".wxl", ".wxs",
 		".xml":
 		lic, err = executeTemplate(tmpl, data, "<!--", " ", "-->")
-	case ".j2":
+	case ".j2", ".jinja2", ".jinja":
 		lic, err = executeTemplate(tmpl, data, "{#", "", "#}")
 	case ".ml", ".mli", ".mll", ".mly":
 		lic, err = executeTemplate(tmpl, data, "(**", "   ", "*)")
