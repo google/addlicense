@@ -327,6 +327,7 @@ func licenseHeader(path string, tmpl *template.Template, data licenseData) ([]by
 		".ex", ".exs",
 		".fpp",
 		".graphql",
+		".ini",
 		".jl",
 		".nix",
 		".pl",
