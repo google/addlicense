@@ -399,7 +399,7 @@ func TestLicenseHeader(t *testing.T) {
 		},
 		{
 			[]string{
-				".j2",
+				"f.j2", "f.jinja2", "f.jinja",
 			},
 			"{#\nHYS\n#}\n\n",
 		},
