@@ -352,6 +352,7 @@ func TestLicenseHeader(t *testing.T) {
 				"f.ex", "f.exs",
 				"f.graphql",
 				"f.jl",
+				"f.ini",
 				"f.nix",
 				"f.pl",
 				"f.pp",
