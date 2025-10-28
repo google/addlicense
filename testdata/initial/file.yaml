@@ -1,0 +1,5 @@
+%YAML 1.2
+---
+root:
+  one: "one"
+  two: {}
