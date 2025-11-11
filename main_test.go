@@ -555,3 +555,26 @@ func TestFileMatches(t *testing.T) {
 		}
 	}
 }
+
+func TestSPDXFlagSet(t *testing.T) {
+	spdxValue := ""
+	tests := []struct {
+		name       string
+		i          spdxFlag
+		spdxString string
+		wantErr    bool
+	}{
+		{"SPDX: On", spdxFlag(spdxValue), "true", false},
+		{"SPDX: Only", spdxFlag(spdxValue), "only", false},
+		{"SPDX: Strict", spdxFlag(spdxValue), "strict", false},
+		{"SPDX: Off", spdxFlag(spdxValue), "", true},
+		{"SPDX: Invalid", spdxFlag(spdxValue), "notvalid", true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := tt.i.Set(tt.spdxString); (err != nil) != tt.wantErr {
+				t.Errorf("Set() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}

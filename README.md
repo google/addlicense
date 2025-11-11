@@ -21,7 +21,7 @@ addlicense requires go 1.16 or later.
     -f      license file
     -ignore file patterns to ignore, for example: -ignore **/*.go -ignore vendor/**
     -l      license type: apache, bsd, mit, mpl (default "apache")
-    -s      Include SPDX identifier in license header. Set -s=only to only include SPDX identifier.
+    -s      Include SPDX identifier in license header. Set -s=only to only include SPDX identifier. Set -s=strict for SPDX license and copytright tags
     -v      verbose mode: print the name of the files that are modified
     -y      copyright year(s) (default is the current year)
 

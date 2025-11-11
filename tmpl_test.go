@@ -124,6 +124,14 @@ func TestFetchTemplate(t *testing.T) {
 			tmplSPDX,
 			nil,
 		},
+		{
+			"apache license with SPDX strict",
+			"Apache-2.0",
+			"",
+			spdxStrict,
+			tmplSPDXStrict,
+			nil,
+		},
 	}
 
 	for _, tt := range tests {
