@@ -91,11 +91,36 @@ func executeTemplate(t *template.Template, d licenseData, top, mid, bot string) 
 		fmt.Fprintln(&out, top)
 	}
 	s := bufio.NewScanner(&buf)
+	found_empty_line := false
 	for s.Scan() {
-		fmt.Fprintln(&out, strings.TrimRightFunc(mid+s.Text(), unicode.IsSpace))
+		line := strings.TrimRightFunc(s.Text(), unicode.IsSpace)
+		found_empty_line = found_empty_line || line == ""
+		fmt.Fprintln(&out, strings.TrimRightFunc(mid+line, unicode.IsSpace))
 	}
 	if bot != "" {
 		fmt.Fprintln(&out, bot)
+	} else if found_empty_line && len(mid) < 80 {
+		// Found empty lines in the license header, so there are multiple paragraphs in the license.
+		//
+		// If the license does not specify a bottom suffix, add a visual separation line to the
+		// license header from the following code. For example:
+		//
+		// top, mid, bot = "", "# ", ""
+		//
+		//     # License Header
+		//     # ============================
+		//
+		//     Code starts here...
+		//
+		// top, mid, bot = "/**", " * ", " */"
+		//
+		//     /**
+		//      * License Header
+		//      */
+		//
+		//     Code starts here...
+		//
+		fmt.Fprintln(&out, mid+strings.Repeat("=", 80-len(mid)))
 	}
 	fmt.Fprintln(&out)
 	return out.Bytes(), nil
