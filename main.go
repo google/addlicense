@@ -338,7 +338,8 @@ func licenseHeader(path string, tmpl *template.Template, data licenseData) ([]by
 		".tcl",
 		".tf",
 		".toml",
-		".yaml", ".yml":
+		".yaml", ".yml",
+		".msg", ".srv", ".action":
 		lic, err = executeTemplate(tmpl, data, "", "# ", "")
 	case
 		".el",

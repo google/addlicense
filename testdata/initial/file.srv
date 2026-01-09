@@ -1,0 +1,10 @@
+# Example request header
+std_msgs/Header header
+
+# Example request data
+float32 test_data
+
+---
+
+# Example response
+bool accepted
