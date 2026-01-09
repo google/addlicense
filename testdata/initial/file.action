@@ -1,0 +1,15 @@
+# Example goal header
+std_msgs/Header header
+
+# Example goal data
+float32 test_data
+
+--- 
+
+# Example result
+bool succeeded
+
+---
+
+# Example feedback
+float32 progress
