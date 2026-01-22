@@ -317,7 +317,8 @@ func licenseHeader(path string, tmpl *template.Template, data licenseData) ([]by
 		".proto",
 		".rs",
 		".swift",
-		".v", ".sv":
+		".v", ".sv",
+		".zig":
 		lic, err = executeTemplate(tmpl, data, "", "// ", "")
 	case
 		".awk",

@@ -340,6 +340,7 @@ func TestLicenseHeader(t *testing.T) {
 				"f.rs",
 				"f.swift",
 				"f.v", "f.sv",
+				"f.zig",
 			},
 			"// HYS\n\n",
 		},
