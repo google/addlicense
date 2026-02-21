@@ -385,6 +385,7 @@ func TestLicenseHeader(t *testing.T) {
 				"f.hs",
 				"f.lua",
 				"f.sql", "f.sdl",
+				"f.vhdl", "f.vhd",
 			},
 			"-- HYS\n\n",
 		},
