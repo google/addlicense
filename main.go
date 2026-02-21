@@ -323,6 +323,7 @@ func licenseHeader(path string, tmpl *template.Template, data licenseData) ([]by
 		".awk",
 		".buckconfig", "buck",
 		".bzl", ".bazel", "build", ".build",
+		".core",
 		".dockerfile", "dockerfile",
 		".ex", ".exs",
 		".fpp",
@@ -395,6 +396,7 @@ var head = []string{
 	"<?php",                    // PHP opening tag
 	"# escape",                 // Dockerfile directive https://docs.docker.com/engine/reference/builder/#parser-directives
 	"# syntax",                 // Dockerfile directive https://docs.docker.com/engine/reference/builder/#parser-directives
+	"capi=",                    // FuseSoC .core files
 }
 
 func hashBang(b []byte) []byte {

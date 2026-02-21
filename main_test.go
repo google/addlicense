@@ -245,6 +245,7 @@ func TestAddLicense(t *testing.T) {
 		{"<?php\ncontent", "<?php\n// HYS\n\ncontent", true},
 		{"# escape: `\ncontent", "# escape: `\n// HYS\n\ncontent", true},
 		{"# syntax: docker/dockerfile:1.3\ncontent", "# syntax: docker/dockerfile:1.3\n// HYS\n\ncontent", true},
+		{"CAPI=2:\ncontent", "CAPI=2:\n// HYS\n\ncontent", true},
 
 		// ensure files with existing license or generated files are
 		// skipped. No need to test all permutations of these, since
@@ -348,6 +349,7 @@ func TestLicenseHeader(t *testing.T) {
 				"f.awk",
 				"f.buckconfig", "buck",
 				"f.bzl", "f.bazel", "build", "f.build",
+				"f.core",
 				"f.dockerfile", "dockerfile",
 				"f.ex", "f.exs",
 				"f.graphql",

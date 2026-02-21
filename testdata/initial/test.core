@@ -1,0 +1,8 @@
+CAPI=2:
+name: test:core:unit:1.0.0
+
+filesets:
+  rtl:
+    files:
+      - pe.vhd
+    file_type: vhdlSource
