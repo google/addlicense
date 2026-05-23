@@ -334,7 +334,7 @@ func licenseHeader(path string, tmpl *template.Template, data licenseData) ([]by
 		".py", ".pyx", ".pxd",
 		".raku",
 		".rb", ".ru", "gemfile",
-		".sh", ".bash", ".zsh",
+		".sh", ".bash", ".zsh", ".bats",
 		".tcl",
 		".tf",
 		".toml",
