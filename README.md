@@ -16,14 +16,15 @@ addlicense requires go 1.16 or later.
 
     addlicense [flags] pattern [pattern ...]
 
-    -c      copyright holder (default "Google LLC")
-    -check  check only mode: verify presence of license headers and exit with non-zero code if missing
-    -f      license file
-    -ignore file patterns to ignore, for example: -ignore **/*.go -ignore vendor/**
-    -l      license type: apache, bsd, mit, mpl (default "apache")
-    -s      Include SPDX identifier in license header. Set -s=only to only include SPDX identifier.
-    -v      verbose mode: print the name of the files that are modified
-    -y      copyright year(s) (default is the current year)
+    -c             copyright holder (default "Google LLC")
+    -check         check only mode: verify presence of license headers and exit with non-zero code if missing
+    -comment-style override the comment style for a file extension, for example: -comment-style h://,ts:docblock
+    -f             license file
+    -ignore        file patterns to ignore, for example: -ignore **/*.go -ignore vendor/**
+    -l             license type: apache, bsd, mit, mpl (default "apache")
+    -s             Include SPDX identifier in license header. Set -s=only to only include SPDX identifier.
+    -v             verbose mode: print the name of the files that are modified
+    -y             copyright year(s) (default is the current year)
 
 The pattern argument can be provided multiple times, and may also refer
 to single files.  Directories are processed recursively.
@@ -35,6 +36,29 @@ all subdirectories:
 
 The `-ignore` flag can use any pattern [supported by
 doublestar](https://github.com/bmatcuk/doublestar#patterns).
+
+The `-comment-style` flag can be used to override the default comment style for one or more supported file extensions. For example:
+
+    addlicense -comment-style h://,ts:docblock .
+
+Here `.h` files get `//` line comments, and `.ts` files get a `/** */` block.
+
+The available styles are:
+
+| Style        | Renders as          |
+| ------------ | ------------------- |
+| `//`         | `// text`           |
+| `#`          | `# text`            |
+| `;;`         | `;; text`           |
+| `%`          | `% text`            |
+| `--`         | `-- text`           |
+| `vim`        | `" text`            |
+| `block`      | `/*` … ` * text` … ` */` |
+| `docblock`   | `/**` … ` * text` … ` */` |
+| `html`       | `<!-- text -->`     |
+| `jinja`      | `{# text #}`        |
+| `ocaml`      | `(** text *)`       |
+| `powershell` | `<# text #>`        |
 
 ## Running in a Docker Container
 

@@ -19,6 +19,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 	"text/template"
@@ -554,4 +555,99 @@ func TestFileMatches(t *testing.T) {
 			t.Errorf("fileMatches(%q, %q) returned %v, want %v", tt.path, patterns, got, tt.wantMatch)
 		}
 	}
+}
+
+// Test that -comment-style overrides change the comment style for an extension,
+// while non-overridden extensions keep their built-in defaults.
+func TestLicenseHeaderOverrides(t *testing.T) {
+	tpl := template.Must(template.New("").Parse("{{.Holder}}{{.Year}}{{.SPDXID}}"))
+	data := licenseData{Holder: "H", Year: "Y", SPDXID: "S"}
+
+	commentOverrides = commentStyleFlag{
+		".h":  styleDoubleSlash, // default is single-star block
+		".ts": styleBlock,       // default is docblock
+		".go": styleDocBlock,    // default is //
+	}
+	defer func() { commentOverrides = nil }()
+
+	tests := []struct {
+		path string
+		want string
+	}{
+		{"f.h", "// HYS\n\n"},
+		{"f.ts", "/*\n * HYS\n */\n\n"},
+		{"f.go", "/**\n * HYS\n */\n\n"},
+		{"f.c", "/*\n * HYS\n */\n\n"}, // not overridden: default block style
+	}
+	for _, tt := range tests {
+		header, _ := licenseHeader(tt.path, tpl, data)
+		if got := string(header); got != tt.want {
+			t.Errorf("licenseHeader(%q) with overrides returned: %q, want: %q", tt.path, got, tt.want)
+		}
+	}
+}
+
+// Test parsing of the -comment-style flag value.
+func TestCommentStyleFlagSet(t *testing.T) {
+	tests := []struct {
+		name    string
+		values  []string // each element is one -comment-style flag occurrence
+		want    map[string]commentStyle
+		wantErr bool
+	}{
+		{"single line style", []string{"h://"}, map[string]commentStyle{".h": "//"}, false},
+		{"comma separated", []string{"h://,ts:docblock"}, map[string]commentStyle{".h": "//", ".ts": "docblock"}, false},
+		{"repeated flag accumulates", []string{"h://", "py:#"}, map[string]commentStyle{".h": "//", ".py": "#"}, false},
+		{"missing colon", []string{"hslashes"}, nil, true},
+		{"empty extension", []string{":#"}, nil, true},
+		{"empty style", []string{"h:"}, nil, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := commentStyleFlag{}
+			var err error
+			for _, v := range tt.values {
+				if err = c.Set(v); err != nil {
+					break
+				}
+			}
+			if tt.wantErr {
+				if err == nil {
+					t.Fatalf("Set(%v) expected error, got nil (result %v)", tt.values, c)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("Set(%v) unexpected error: %v", tt.values, err)
+			}
+			if !reflect.DeepEqual(map[string]commentStyle(c), tt.want) {
+				t.Errorf("Set(%v) = %v, want %v", tt.values, map[string]commentStyle(c), tt.want)
+			}
+		})
+	}
+}
+
+// Test that the -comment-style flag changes the emitted header end-to-end.
+func TestCommentStyleOverride(t *testing.T) {
+	if os.Getenv("RUNME") != "" {
+		main()
+		return
+	}
+
+	tmp := tempDir(t)
+	t.Logf("tmp dir: %s", tmp)
+	samplefile := filepath.Join(tmp, "file.c")
+	const sampleLicensed = "testdata/comment_style_file.c"
+
+	run(t, "cp", "testdata/initial/file.c", samplefile)
+	cmd := exec.Command(os.Args[0],
+		"-test.run=TestCommentStyleOverride",
+		"-l", "apache", "-c", "Google LLC", "-y", "2018",
+		"-comment-style", "c://", samplefile,
+	)
+	cmd.Env = []string{"RUNME=1"}
+	if out, err := cmd.CombinedOutput(); err != nil {
+		t.Fatalf("%v\n%s", err, out)
+	}
+	run(t, "diff", samplefile, sampleLicensed)
 }

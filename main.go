@@ -53,6 +53,7 @@ var (
 	skipExtensionFlags stringSlice
 	ignorePatterns     stringSlice
 	spdx               spdxFlag
+	commentOverrides   commentStyleFlag
 
 	holder    = flag.String("c", "Google LLC", "copyright holder")
 	license   = flag.String("l", "apache", "license type: apache, bsd, mit, mpl")
@@ -70,6 +71,7 @@ func init() {
 	flag.Var(&skipExtensionFlags, "skip", "[deprecated: see -ignore] file extensions to skip, for example: -skip rb -skip go")
 	flag.Var(&ignorePatterns, "ignore", "file patterns to ignore, for example: -ignore **/*.go -ignore vendor/**")
 	flag.Var(&spdx, "s", "Include SPDX identifier in license header. Set -s=only to only include SPDX identifier.")
+	flag.Var(&commentOverrides, "comment-style", "override the comment style for a file extension, as comma-separated ext:style pairs, for example: -comment-style h://,ts:docblock")
 }
 
 // stringSlice stores the results of a repeated command line flag as a string slice.
@@ -107,6 +109,97 @@ func (i *spdxFlag) Set(value string) error {
 	return nil
 }
 
+// commentStyleFlag accumulates -comment-style overrides as a map of normalized
+// file extension to comment style label.
+type commentStyleFlag map[string]commentStyle
+
+func (i *commentStyleFlag) String() string {
+	if len(*i) == 0 {
+		return ""
+	}
+	v := ""
+	for ext, style := range *i {
+		v += fmt.Sprintf("%s:%s,", ext, style)
+	}
+	return v[:len(v)-1]
+}
+
+// Set parses one -comment-style value, a comma-separated list of "ext:style"
+// pairs, and records each override. It may be called more than once when the
+// flag is repeated.
+func (i *commentStyleFlag) Set(value string) error {
+	if *i == nil {
+		*i = commentStyleFlag{}
+	}
+	for _, entry := range strings.Split(value, ",") {
+		parts := strings.SplitN(entry, ":", 2)
+		if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+			return fmt.Errorf("error: flag 'comment-style' expects \"ext:style[,ext:style]\", got %q", entry)
+		}
+		ext := strings.ToLower(parts[0])
+		style := parts[1]
+
+		if !strings.HasPrefix(ext, ".") {
+			// normalize extension to start with a dot, for example "go" becomes ".go"
+			// this matches the behavior of fileExtension()
+			ext = "." + ext
+		}
+
+		(*i)[ext] = commentStyle(style)
+	}
+	return nil
+}
+
+// commentStyle identifies a comment formatting style by label. Its string value
+// is what users pass to -comment-style.
+type commentStyle string
+
+const (
+	styleDoubleSlash     commentStyle = "//"
+	styleSingleHash      commentStyle = "#"
+	styleDoubleSemicolon commentStyle = ";;"
+	styleSinglePercent   commentStyle = "%"
+	styleDoubleDash      commentStyle = "--"
+	styleVim             commentStyle = "vim"      // Vimscript: leading "
+	styleBlock           commentStyle = "block"    // /*  *  */
+	styleDocBlock        commentStyle = "docblock" // /** *  */
+	styleHTML            commentStyle = "html"
+	styleJinja           commentStyle = "jinja"
+	styleOCaml           commentStyle = "ocaml"
+	stylePowerShell      commentStyle = "powershell"
+)
+
+func (cs *commentStyle) affixes() (top string, mid string, bot string) {
+	switch *cs {
+	case styleDoubleSlash:
+		return "", "// ", ""
+	case styleSingleHash:
+		return "", "# ", ""
+	case styleDoubleSemicolon:
+		return "", ";; ", ""
+	case styleSinglePercent:
+		return "", "% ", ""
+	case styleDoubleDash:
+		return "", "-- ", ""
+	case styleVim:
+		return "", `" `, ""
+	case styleBlock:
+		return "/*", " * ", " */"
+	case styleDocBlock:
+		return "/**", " * ", " */"
+	case styleHTML:
+		return "<!--", " ", "-->"
+	case styleJinja:
+		return "{#", "", "#}"
+	case styleOCaml:
+		return "(**", "   ", "*)"
+	case stylePowerShell:
+		return "<#", " ", "#>"
+	default:
+		return "", "", ""
+	}
+}
+
 func main() {
 	flag.Parse()
 	if flag.NArg() == 0 {
@@ -122,6 +215,13 @@ func main() {
 	for _, p := range ignorePatterns {
 		if !doublestar.ValidatePattern(p) {
 			log.Fatalf("-ignore pattern %q is not valid", p)
+		}
+	}
+
+	// verify that all -comment-style overrides are valid
+	for _, label := range commentOverrides {
+		if top, mid, bot := label.affixes(); top == "" && mid == "" && bot == "" {
+			log.Fatalf("-comment-style %q is not valid", label)
 		}
 	}
 
@@ -285,25 +385,30 @@ func fileHasLicense(path string) (bool, error) {
 // licenseHeader populates the provided license template with data, and returns
 // it with the proper prefix for the file type specified by path. The file does
 // not need to actually exist, only its name is used to determine the prefix.
+//
+// The comment style is the one set via -comment-style for the file's extension,
+// or the built-in default from defaultStyleLabel. A nil result with a nil error
+// means the file type is unrecognized and should be skipped.
 func licenseHeader(path string, tmpl *template.Template, data licenseData) ([]byte, error) {
-	var lic []byte
-	var err error
 	base := strings.ToLower(filepath.Base(path))
+	ext := fileExtension(base)
+
+	var style commentStyle
 
 	// When adding an extension, also add it to TestLicenseHeader in main_test.go
-	switch fileExtension(base) {
+	switch ext {
 	case
 		".c", ".h",
 		".gv",
 		".java",
 		".kt", ".kts",
 		".scala":
-		lic, err = executeTemplate(tmpl, data, "/*", " * ", " */")
+		style = styleBlock
 	case
 		".css", ".scss", ".sass", ".less",
 		".js", ".mjs", ".cjs", ".jsx",
 		".ts", ".tsx":
-		lic, err = executeTemplate(tmpl, data, "/**", " * ", " */")
+		style = styleDocBlock
 	case
 		".cc", ".cpp", ".hh", ".hpp",
 		".cs",
@@ -318,7 +423,7 @@ func licenseHeader(path string, tmpl *template.Template, data licenseData) ([]by
 		".rs",
 		".swift",
 		".v", ".sv":
-		lic, err = executeTemplate(tmpl, data, "", "// ", "")
+		style = styleDoubleSlash
 	case
 		".awk",
 		".buckconfig", "buck",
@@ -339,41 +444,51 @@ func licenseHeader(path string, tmpl *template.Template, data licenseData) ([]by
 		".tf",
 		".toml",
 		".yaml", ".yml":
-		lic, err = executeTemplate(tmpl, data, "", "# ", "")
+		style = styleSingleHash
 	case
 		".el",
 		".lisp",
 		".scm":
-		lic, err = executeTemplate(tmpl, data, "", ";; ", "")
+		style = styleDoubleSemicolon
 	case ".erl":
-		lic, err = executeTemplate(tmpl, data, "", "% ", "")
+		style = styleSinglePercent
 	case
 		".hs",
 		".lua",
 		".sql", ".sdl":
-		lic, err = executeTemplate(tmpl, data, "", "-- ", "")
+		style = styleDoubleDash
 	case
 		".html", ".htm",
 		".vue",
 		".svelte",
 		".wxi", ".wxl", ".wxs",
 		".xml":
-		lic, err = executeTemplate(tmpl, data, "<!--", " ", "-->")
+		style = styleHTML
 	case ".j2", ".jinja2", ".jinja":
-		lic, err = executeTemplate(tmpl, data, "{#", "", "#}")
+		style = styleJinja
 	case ".ml", ".mli", ".mll", ".mly":
-		lic, err = executeTemplate(tmpl, data, "(**", "   ", "*)")
+		style = styleOCaml
 	case ".ps1", ".psm1":
-		lic, err = executeTemplate(tmpl, data, "<#", " ", "#>")
+		style = stylePowerShell
 	case ".vim":
-		lic, err = executeTemplate(tmpl, data, "", `" `, "")
+		style = styleVim
 	default:
 		// handle various cmake files
 		if base == "cmakelists.txt" || strings.HasSuffix(base, ".cmake.in") || strings.HasSuffix(base, ".cmake") {
-			lic, err = executeTemplate(tmpl, data, "", "# ", "")
+			style = styleSingleHash
+		} else {
+			// unknown file type, skip
+			return nil, nil
 		}
 	}
-	return lic, err
+
+	if userStyle, ok := commentOverrides[ext]; ok {
+		style = userStyle
+	}
+
+	top, mid, bot := style.affixes()
+
+	return executeTemplate(tmpl, data, top, mid, bot)
 }
 
 // fileExtension returns the file extension of name, or the full name if there
