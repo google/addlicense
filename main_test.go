@@ -390,6 +390,12 @@ func TestLicenseHeader(t *testing.T) {
 		},
 		{
 			[]string{
+				"f.handlebars", "f.hbs",
+			},
+			"{{!--\nHYS\n--}}\n\n",
+		},
+		{
+			[]string{
 				"f.html", "f.htm",
 				"f.vue",
 				"f.xml",
