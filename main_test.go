@@ -89,6 +89,44 @@ func TestMultiyear(t *testing.T) {
 	run(t, "diff", samplefile, sampleLicensed)
 }
 
+func TestOverlappingPaths(t *testing.T) {
+	if os.Getenv("RUNME") != "" {
+		main()
+		return
+	}
+
+	dir := t.TempDir()
+	path := filepath.Join(dir, "file.c")
+	source := "int main(void) {\n" + strings.Repeat("    /* keep this source line */\n", 4096) + "    return 0;\n}\n"
+	if err := ioutil.WriteFile(path, []byte(source), 0644); err != nil {
+		t.Fatal(err)
+	}
+	args := []string{"-test.run=TestOverlappingPaths", "-l", "bsd", "-c", "Test", "-y", "2026", "-v"}
+	for i := 0; i < 64; i++ {
+		args = append(args, ".", "./file.c", path)
+	}
+	cmd := exec.Command(os.Args[0], args...)
+	cmd.Dir = dir
+	cmd.Env = append(os.Environ(), "RUNME=1", "GOMAXPROCS=8")
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("%v\n%s", err, out)
+	}
+	if count := strings.Count(string(out), " modified"); count != 1 {
+		t.Errorf("file was modified %d times, want 1", count)
+	}
+	got, err := ioutil.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.HasSuffix(string(got), source) {
+		t.Fatal("overlapping paths changed the original source content")
+	}
+	if count := strings.Count(string(got), "Copyright (c) 2026 Test"); count != 1 {
+		t.Errorf("got %d copyright headers, want 1", count)
+	}
+}
+
 func TestWriteErrors(t *testing.T) {
 	if os.Getenv("RUNME") != "" {
 		main()

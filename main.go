@@ -150,7 +150,17 @@ func main() {
 	done := make(chan struct{})
 	go func() {
 		var wg errgroup.Group
+		seen := make(map[string]bool)
 		for f := range ch {
+			path, err := filepath.Abs(f.path)
+			if err != nil {
+				log.Fatal(err)
+			}
+			if seen[path] {
+				continue
+			}
+			// Overlapping inputs must not schedule concurrent writes to the same file.
+			seen[path] = true
 			f := f // https://golang.org/doc/faq#closures_and_goroutines
 			wg.Go(func() error {
 				if *checkonly {
